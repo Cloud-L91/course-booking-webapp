@@ -1,0 +1,11 @@
+/* Hero Section */
+.hero-banner {
+    background-image: url('../img/home/hero.jpg');
+    background-size: cover;
+    background-position: center;
+    min-height: 420px;
+}
+
+.hero-mask {
+    background-color: rgba(0, 0, 0, 0.65);
+}

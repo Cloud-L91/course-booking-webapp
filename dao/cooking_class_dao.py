@@ -1,0 +1,56 @@
+import sqlite3
+from dao import utilities_dao
+
+def get_cooking_classes():
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM cooking_class")
+
+    cooking_classes = cursor.fetchall()
+
+    utilities_dao.close_connection(conn, cursor)
+
+    return cooking_classes
+
+def get_single_cooking_class(id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM cooking_class WHERE id = ?", (id,))
+    cooking_class = cursor.fetchone()
+
+    utilities_dao.close_connection(conn, cursor)
+
+    return cooking_class
+
+def get_all_sessions():
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT * 
+    FROM CLASS_SESSION 
+    JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
+    """)
+    sessions = cursor.fetchall()
+
+    utilities_dao.close_connection(conn, cursor)
+    return sessions
+
+
+def get_single_session(session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT *
+    FROM CLASS_SESSION
+    JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
+    WHERE CLASS_SESSION.id = ?
+    """, (session_id,))
+    session = cursor.fetchone()
+
+    utilities_dao.close_connection(conn, cursor)
+
+    return session

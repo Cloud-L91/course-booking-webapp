@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}
+Cooking School - Home
+{% endblock %}
+
+{% block content %}
+
+
+<section class="hero-section">
+    <div class="shadow-lg position-relative overflow-hidden hero-banner">
+
+        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center hero-mask">
+            <div class="container">
+                <div class="text-white col-lg-8">
+                    <h1 class="display-5 fw-bold mb-3">Cooking School</h1>
+                    <p class="lead mb-4">
+                        Scopri le lezioni pratiche con i migliori chef, prenota la tua postazione in laboratorio e
+                        affina le tue abilità culinarie.
+                    </p>
+                    <div class="d-grid gap-2 d-sm-flex">
+                        <a href="#sessions-list" class="btn btn-primary btn-lg px-4 gap-3 fw-bold">Esplora Sessioni</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<div class="container my-4">
+    {% if session_classes %}
+    <div class="row g-4">
+        {% for session in session_classes %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <!-- Immagine del corso -->
+                <img src="{{ url_for('static', filename='img/classes/' ~ session.photo_1) }}" alt="{{ session.title }}"
+                    class="card-img-top">
+
+                <!-- Corpo della card -->
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{{ url_for('session_details', session_id=session.id) }}"
+                            class="stretched-link text-decoration-none text-dark">
+                            {{ session.title }}
+                        </a>
+                    </h5>
+                    <!-- Durata e Difficoltà -->
+                    <ul class="mb-3 list-inline">
+                        <li class="list-inline-item">
+                            <i class="bi bi-clock me-1"></i>
+                            <span class="small">{{ session.duration }} mins</span>
+                        </li>
+                        <li class="list-inline-item ms-3">
+                            <i class="bi bi-bar-chart-fill me-1"></i>
+                            <span class="small">{{ session.difficulty }}</span>
+                        </li>
+                    </ul>
+
+                    <!-- Giorno e Orario -->
+                    <p class="small mb-0">
+                        <i class="bi bi-person-badge me-1"></i>
+                        <strong>Chef:</strong> {{ session.chef_name }}
+                    </p>
+                </div>
+
+
+
+                <div class="card-footer">
+                    <small class="text-body-secondary"><strong>Day: </strong>{{ session.day_of_week }} - {{
+                        session.start_time }}</small>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+
+{% endblock %}
