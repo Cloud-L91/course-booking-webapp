@@ -1,0 +1,6 @@
+/* Stile globale della barra di scorrimento della pagina */
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: #0072FA #212529;
+}

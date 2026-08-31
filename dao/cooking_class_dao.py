@@ -54,3 +54,38 @@ def get_single_session(session_id):
     utilities_dao.close_connection(conn, cursor)
 
     return session
+
+def get_ingredients(cooking_class_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT *
+    FROM INGREDIENT
+    WHERE COOKING_CLASS_id = ?
+    """, (cooking_class_id,))
+    ingredients = cursor.fetchall()
+
+    utilities_dao.close_connection(conn, cursor)
+
+    return ingredients
+
+def get_available_spots(session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT max_capacity - (
+        SELECT COUNT(*) 
+        FROM BOOKING 
+        WHERE CLASS_SESSION_id = cs.id AND status = 'ENROLLED') AS available_spots
+    FROM CLASS_SESSION cs
+    WHERE cs.id = ?
+    """, (session_id,))
+
+    result = cursor.fetchone()
+    utilities_dao.close_connection(conn, cursor)
+
+    if result and result[0] is not None:
+        return result[0]
+    return 0

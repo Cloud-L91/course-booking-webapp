@@ -15,8 +15,7 @@ Cooking School - Home
                 <div class="text-white col-lg-8">
                     <h1 class="display-5 fw-bold mb-3">Cooking School</h1>
                     <p class="lead mb-4">
-                        Scopri le lezioni pratiche con i migliori chef, prenota la tua postazione in laboratorio e
-                        affina le tue abilità culinarie.
+                        Discover hands-on classes with top chefs, book your workstation in the kitchen, and hone your culinary skills.
                     </p>
                     <div class="d-grid gap-2 d-sm-flex">
                         <a href="#sessions-list" class="btn btn-primary btn-lg px-4 gap-3 fw-bold">Esplora Sessioni</a>
@@ -35,11 +34,9 @@ Cooking School - Home
         {% for session in session_classes %}
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm">
-                <!-- Immagine del corso -->
                 <img src="{{ url_for('static', filename='img/classes/' ~ session.photo_1) }}" alt="{{ session.title }}"
                     class="card-img-top">
 
-                <!-- Corpo della card -->
                 <div class="card-body">
                     <h5 class="card-title">
                         <a href="{{ url_for('session_details', session_id=session.id) }}"
@@ -47,7 +44,7 @@ Cooking School - Home
                             {{ session.title }}
                         </a>
                     </h5>
-                    <!-- Durata e Difficoltà -->
+                    
                     <ul class="mb-3 list-inline">
                         <li class="list-inline-item">
                             <i class="bi bi-clock me-1"></i>
@@ -59,14 +56,11 @@ Cooking School - Home
                         </li>
                     </ul>
 
-                    <!-- Giorno e Orario -->
                     <p class="small mb-0">
                         <i class="bi bi-person-badge me-1"></i>
                         <strong>Chef:</strong> {{ session.chef_name }}
                     </p>
                 </div>
-
-
 
                 <div class="card-footer">
                     <small class="text-body-secondary"><strong>Day: </strong>{{ session.day_of_week }} - {{
@@ -79,6 +73,5 @@ Cooking School - Home
     </div>
     {% endif %}
 </div>
-
 
 {% endblock %}

@@ -1,0 +1,48 @@
+-- 1. Inserimento della Cooking Class (assegnata al manager Jill Valentine)
+INSERT INTO COOKING_CLASS (
+    title, 
+    cuisine, 
+    duration, 
+    difficulty, 
+    chef_name, 
+    description, 
+    dietary_category, 
+    photo_1, 
+    photo_2, 
+    photo_3, 
+    USER_email
+) VALUES (
+    'NYC Smash Burger & BBQ',
+    'American',
+    150,
+    'Beginner',
+    'Joe Bastianich',
+    'A masterclass on authentic New York comfort food: from achieving the perfect Maillard reaction on a smash burger to glazing the ribs. No shortcuts, top-quality meat, and zero margin for error—unless you want to hear: "You want me to drop dead?"',
+    'Standard',
+    'burger_1.jpg',
+    'burger_2.jpg',
+    'burger_3.jpg',
+    'jill.valentine@example.com'
+);
+
+-- 2. Inserimento degli ingredienti collegati all'ultimo corso inserito
+INSERT INTO INGREDIENT (name, COOKING_CLASS_id) VALUES 
+('Black Angus ground chuck blend', 2),
+('Sharp aged Cheddar cheese', 2),
+('Smoked streaky bacon', 2),
+('Artisanal brioche buns', 2),
+('Dill pickle slices', 2),
+('Kansas City style BBQ sauce', 2),
+('Caramelized sweet onions', 2),
+('Salted butter', 2);
+
+-- 3. Inserimento di due sessioni settimanali per il corso
+INSERT INTO CLASS_SESSION (
+    max_capacity, 
+    start_time, 
+    day_of_week, 
+    kitchen, 
+    COOKING_CLASS_id
+) VALUES 
+(10, '19:30', 'Thursday', 'Master Kitchen', (SELECT id FROM COOKING_CLASS WHERE title = 'NYC Smash Burger & BBQ')),
+(8, '20:30', 'Saturday', 'Kitchen 1 (Ovens)', (SELECT id FROM COOKING_CLASS WHERE title = 'NYC Smash Burger & BBQ'));

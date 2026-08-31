@@ -16,7 +16,7 @@ CURRENT_DAY = "Wednesday"
 CURRENT_TIME = "13:00"
 
 @app.route("/")
-def index():
+def home():
 
     session_classes = cooking_class_dao.get_all_sessions()
 
@@ -25,8 +25,10 @@ def index():
 @app.route("/session_details/<int:session_id>")
 def session_details(session_id):
     session_class = cooking_class_dao.get_single_session(session_id)
+    ingredients = cooking_class_dao.get_ingredients(session_class["COOKING_CLASS_id"])
+    available_spots = cooking_class_dao.get_available_spots(session_id)
 
-    return render_template("public/session_details.html", session_class=session_class)
+    return render_template("public/session_details.html", session_class=session_class, ingredients=ingredients, available_spots=available_spots)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
