@@ -4,3 +4,15 @@ html {
     scrollbar-width: thin;
     scrollbar-color: #0072FA #212529;
 }
+
+body {
+    overflow-x: hidden;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.avatar-initials {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}

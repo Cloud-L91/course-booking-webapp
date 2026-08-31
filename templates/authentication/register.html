@@ -7,7 +7,7 @@ Cooking School - Register
 {% block content %}
 <section class="form-card">
     <div class="register-box">
-        <form form-signin method="POST">
+        <form class="form-signin" method="POST" action="{{ url_for('register') }}">
             <small class="text-body-secondary">The cake is a lie</small>
             <h1 class="mb-3 fw-normal">Create an account</h1>
             <p>We promise not to let you set the kitchen on fire on your first attempt.</p>

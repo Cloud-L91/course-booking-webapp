@@ -9,3 +9,18 @@
 .hero-mask {
     background-color: rgba(0, 0, 0, 0.65);
 }
+
+/* Altezza fissa immagine card in home */
+.card-session-img {
+    height: 200px;
+}
+
+/* Altezza fissa miniature secondarie nei dettagli */
+.detail-thumb-img {
+    height: 100px;
+}
+
+/* Offset superiore per la barra laterale sticky */
+.sticky-sidebar-offset {
+    top: 5rem;
+}

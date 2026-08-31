@@ -7,20 +7,31 @@ Cooking School - Login
 {% block content %}
 <section class="form-card">
     <div class="login-box">
-        <form form-signin w-100 m-auto>
+        <form class="form-signin w-100 m-auto" method="POST" action="{{ url_for('login') }}">
             <small class="text-body-secondary">The cake is a lie</small>
             <h1 class="mb-3 fw-normal">Sign in</h1>
             <p>Step inside and prove you aren't a total disaster in the kitchen.</p>
+
+            {% if error %}
+            <div class="alert alert-danger py-2 small" role="alert">
+                {{ error }}
+            </div>
+            {% endif %}
+
             <div class="form-floating">
-                <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+                <input type="email" class="form-control" id="floatingInput" name="email" placeholder="name@example.com"
+                    required>
                 <label for="floatingInput">Email address</label>
             </div>
+
             <div class="form-floating my-3">
-                <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
+                <input type="password" class="form-control" id="floatingPassword" name="password" placeholder="Password"
+                    required>
                 <label for="floatingPassword">Password</label>
             </div>
+
             <div class="form-check text-start my-3">
-                <input class="form-check-input" type="checkbox" value="remember-me" id="checkDefault">
+                <input class="form-check-input" type="checkbox" value="remember-me" id="checkDefault" name="remember">
                 <label class="form-check-label" for="checkDefault">
                     Remember me
                 </label>
