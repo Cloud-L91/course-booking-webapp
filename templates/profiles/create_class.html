@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+Cooking School - Create class
+{% endblock %}
+
+{% block content %}
+<section class="form-card">
+    <div class="register-box">
+        <form form-signin w-100 m-auto method="POST" enctype="multipart/form-data">
+            
+            <!-- BIGGEST PLACEHOLDER -->
+
+            <div class="mb-3">
+                <label for="cover_image">First photo</label>
+                <input class="form-control" type="file" id="photo_1" name="photo_1" accept="image/*">
+            </div>
+            <div class="mb-3">
+                <label for="cover_image">Second photo</label>
+                <input class="form-control" type="file" id="photo_2" name="photo_2" accept="image/*">
+            </div>
+            <div class="mb-4">
+                <label for="cover_image">Third photo</label>
+                <input class="form-control" type="file" id="photo_3" name="photo_3" accept="image/*">
+            </div>
+
+            <button class="btn btn-primary py-2" type="submit">Send</button>
+            <button class="btn btn-secondary py-2" type="reset">Clear</button>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,16 @@
+Jill Valentine		jill.valentine@example.com		manager		jill123
+Paolo Scavalcacinghie 	paolo.scavalcacinghie@example.com  	student  	paolo123
+Tifa Lockhart 		tifa.lockhart@example.com 		student 	tifa123
+Barry Burton 		barry.burton@example.com 		student 	barry123
+Eric Cartman 		eric.cartman@example.com 		student 	cartman123
+Ellen Ripley 		ellen.ripley@example.com 		student		ripley123
+
+
+password1 = "tifa123"
+password2 = "barry123"
+password3 = "cartman123"
+password4 = "ripley123"
+print(generate_password_hash(password1))
+print(generate_password_hash(password2))
+print(generate_password_hash(password3))
+print(generate_password_hash(password4))

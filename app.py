@@ -36,7 +36,20 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-    return render_template("public/login.html")
+    return render_template("authentication/login.html")
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("home"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+    return render_template("authentication/register.html")
 
 @login_manager.user_loader
 def load_user(user_id):

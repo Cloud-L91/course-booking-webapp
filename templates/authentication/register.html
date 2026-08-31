@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}
+Cooking School - Register
+{% endblock %}
+
+{% block content %}
+<section class="form-card">
+    <div class="register-box">
+        <form form-signin method="POST">
+            <small class="text-body-secondary">The cake is a lie</small>
+            <h1 class="mb-3 fw-normal">Create an account</h1>
+            <p>We promise not to let you set the kitchen on fire on your first attempt.</p>
+
+            <div class="row g-2 mb-3">
+                <div class="col-sm-6">
+                    <label class="form-label" for="first_name mb-1">First name</label>
+                    <input class="form-control" type="text" id="first_name" name="first_name" placeholder="" required>
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label" for="last_name" mb-1>Last name</label>
+                    <input class="form-control" type="text" id="last_name" name="last_name" placeholder="" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email">E-mail</label>
+                <input class="form-control" type="text" id="email" name="email" placeholder="">
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" placeholder=""
+                            required>
+                        <span class="input-group-text bg-white border-start-0 text-muted cursor-pointer">
+                            <i class="bi bi-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <label class="form-label" for="confirmPassword">Confirm password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                            placeholder="" required>
+                        <span class="input-group-text bg-white border-start-0 text-muted cursor-pointer">
+                            <i class="bi bi-eye"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-3">
+                <button class="btn btn-primary py-2" type="submit">Send</button>
+                <button class="btn btn-secondary py-2" type="reset">Clear</button>
+            </div>
+
+
+            <footer class="border-top mt-4 pt-3 text-center">
+                <p class="mb-0">
+                    Are you already part of the brigade?
+                    <a href="{{ url_for('login') }}" class="text-decoration-none">Step into</a>
+                    the kitchen.
+                </p>
+            </footer>
+        </form>
+
+    </div>
+</section>
+{% endblock %}

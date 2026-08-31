@@ -33,9 +33,9 @@ Cooking School - Home
     <div class="row g-4">
         {% for session in session_classes %}
         <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm">
+            <div class="card h-100">
                 <img src="{{ url_for('static', filename='img/classes/' ~ session.photo_1) }}" alt="{{ session.title }}"
-                    class="card-img-top">
+                    class="card-img-top object-fit-cover" style="height: 200px;">
 
                 <div class="card-body">
                     <h5 class="card-title">

@@ -87,5 +87,5 @@ def get_available_spots(session_id):
     utilities_dao.close_connection(conn, cursor)
 
     if result and result[0] is not None:
-        return result[0]
+        return int(result[0])
     return 0
