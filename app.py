@@ -53,7 +53,8 @@ def login():
                 password=db_user["password_hash"],
                 role=db_user["role"]
             )
-            login_user(logged_in_user)
+            result = login_user(logged_in_user)
+            print(result)
             return redirect(url_for("home"))
 
     return render_template("authentication/login.html")
@@ -68,10 +69,30 @@ def logout():
 def register():
     if request.method == "POST":
         form_data = request.form.to_dict()
-        username = form_data.get("username")
+        first_name = form_data.get("first_name")
+        last_name = form_data.get("last_name")
         email = form_data.get("email")
         password = form_data.get("password")
+        confirm_password = form_data.get("confirm_password")
+        role = form_data.get("role")
 
+        if not all([first_name, last_name, email, password, confirm_password, role]):
+            return render_template("authentication/register.html", error="All fields are required")
+
+        if password != confirm_password:
+            return render_template("authentication/register.html", error="Passwords do not match")
+
+        existing_user = user_dao.get_user_by_email(email)
+        if existing_user:
+            return render_template("authentication/register.html", error="User already exists")
+
+        password_hash = generate_password_hash(password)
+        success = user_dao.add_user(first_name, last_name, email, password_hash, role)
+    
+        if not success:
+            return render_template("authentication/register.html", error="Failed to register user") 
+
+        return redirect(url_for("login"))
     return render_template("authentication/register.html")
 
 @login_manager.user_loader

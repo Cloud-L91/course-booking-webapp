@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Cooking School - Register
+The cake is a lie - Register
 {% endblock %}
 
 {% block content %}
@@ -9,23 +9,30 @@ Cooking School - Register
     <div class="register-box">
         <form class="form-signin" method="POST" action="{{ url_for('register') }}">
             <small class="text-body-secondary">The cake is a lie</small>
-            <h1 class="mb-3 fw-normal">Create an account</h1>
+            <h1 class="mb-3 fw-normal">New account</h1>
             <p>We promise not to let you set the kitchen on fire on your first attempt.</p>
+
+            {% if error %}
+            <div class="alert alert-danger py-2 small" role="alert">
+                {{ error }}
+            </div>
+            {% endif %}
 
             <div class="row g-2 mb-3">
                 <div class="col-sm-6">
-                    <label class="form-label" for="first_name mb-1">First name</label>
+                    <label class="form-label mb-1" for="first_name">First name</label>
                     <input class="form-control" type="text" id="first_name" name="first_name" placeholder="" required>
                 </div>
                 <div class="col-sm-6">
-                    <label class="form-label" for="last_name" mb-1>Last name</label>
+                    <label class="form-label mb-1" for="last_name">Last name</label>
                     <input class="form-control" type="text" id="last_name" name="last_name" placeholder="" required>
                 </div>
             </div>
 
             <div class="mb-3">
                 <label for="email">E-mail</label>
-                <input class="form-control" type="text" id="email" name="email" placeholder="">
+                <input class="form-control" type="email" id="email" name="email" placeholder="name@example.com"
+                    required>
             </div>
 
             <div class="row g-3 mb-4">
@@ -34,19 +41,50 @@ Cooking School - Register
                     <div class="input-group">
                         <input type="password" class="form-control" id="password" name="password" placeholder=""
                             required>
-                        <span class="input-group-text bg-white border-start-0 text-muted cursor-pointer">
-                            <i class="bi bi-eye"></i>
-                        </span>
+                        <button type="button" class="btn btn-outline-secondary bg-white" id="togglePassword">
+                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <label class="form-label" for="confirmPassword">Confirm password</label>
+                    <label class="form-label" for="confirm_password">Confirm password</label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password"
                             placeholder="" required>
-                        <span class="input-group-text bg-white border-start-0 text-muted cursor-pointer">
-                            <i class="bi bi-eye"></i>
-                        </span>
+                        <button type="button" class="btn btn-outline-secondary bg-white" id="toggleConfirmPassword">
+                            <i class="bi bi-eye" id="toggleConfirmPasswordIcon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="mb-4">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <input type="radio" class="btn-check" name="role" id="role_student" value="student" checked>
+                        <label class="btn role-card text-start p-3 w-100 h-100 rounded-3" for="role_student">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-mortarboard-fill fs-3 text-success me-2"></i>
+                                <span class="fw-bold fs-5 text-success">Student</span>
+                            </div>
+                            <p class="text-muted small mb-0 lh-sm">
+                                Attend the classes and improve your skills. Or at least give it a try.
+                            </p>
+                        </label>
+                    </div>
+
+                    <div class="col-6">
+                        <input type="radio" class="btn-check" name="role" id="role_manager" value="manager">
+                        <label class="btn role-card text-start p-3 w-100 h-100 rounded-3" for="role_manager">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-briefcase-fill fs-3 text-warning me-2"></i>
+                                <span class="fw-bold fs-5 text-warning">Manager</span>
+                            </div>
+                            <p class="text-muted small mb-0 lh-sm">
+                                Manage classes and organize sessions.
+                            </p>
+                        </label>
                     </div>
                 </div>
             </div>

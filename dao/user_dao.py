@@ -11,3 +11,22 @@ def get_user_by_email(email):
     utilities_dao.close_connection(conn, cursor)
 
     return user
+
+def add_user(first_name, last_name, email, password_hash, role):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            "INSERT INTO user (first_name, last_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)",
+            (first_name, last_name, email, password_hash, role)
+        )
+        conn.commit()
+        success = True
+    except Exception as e:
+        print("Errore inserimento:", e)
+        conn.rollback()
+        success = False
+    finally:
+        utilities_dao.close_connection(conn, cursor)
+
+    return success

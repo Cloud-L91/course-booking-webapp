@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Cooking School - {{ session_class.title }}
+The cake is a lie - {{ session_class.title }}
 {% endblock %}
 
 {% block content %}
@@ -118,34 +118,44 @@ Cooking School - {{ session_class.title }}
                         <div class="progress-bar bg-success" style="width: 25%"></div>
                     </div>
 
-                    {% if available_spots > 0 %}
-                    <button class="btn btn-success w-100 py-2 fw-semibold mb-3">Sign up for the session</button>
-                    {% else %}
-                    <button class="btn btn-secondary w-100 py-2 fw-semibold mb-3" disabled>Fully booked</button>
+                    {% if not current_user.is_authenticated %}
+                        <!-- Utente Anonimo: Invito al Login -->
+                        <a href="{{ url_for('login') }}" class="btn btn-primary w-100 py-2 fw-semibold mb-3">
+                            Log in to participate
+                        </a>
+                    {% elif current_user.role == 'student' %}
+                        {% if available_spots > 0 %}
+                            <button class="btn btn-success w-100 py-2 fw-semibold mb-3">Sign up for the session</button>
+                        {% else %}
+                            <button class="btn btn-secondary w-100 py-2 fw-semibold mb-3" disabled>Fully booked</button>
 
-                    <hr class="my-4">
+                            <hr class="my-4">
 
-                    <h6 class="fw-bold mb-3">No spots available?</h5>
+                            <h6 class="fw-bold mb-3">No spots available?</h5>
 
-                    <p class="text-muted small mb-1">Join the waiting list: you will be notified if a spot opens up.</p>
+                            <p class="text-muted small mb-1">Join the waiting list: you will be notified if a spot opens up.
+                            </p>
 
-                    <button class="btn btn-outline-success w-100 py-2 fw-semibold mb-3">Join the waiting list</button>
+                            <button class="btn btn-outline-success w-100 py-2 fw-semibold mb-3">Join the waiting
+                                list</button>
 
-                    {% endif %}
+                            {% endif %}
+                        {% elif current_user.role == 'manager' %}
+                        <!-- Spazio riservato al Manager (da definire in seguito) -->
+                        {% endif %}
+                        <hr class="my-4">
 
-                    <hr class="my-4">
+                        <div class="card text-bg-light p-4 mt-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-info-circle me-2 text-primary"></i>
+                                Cancellation rules
+                            </h6>
 
-                    <div class="card text-bg-light p-4 mt-4">
-                        <h6 class="fw-bold mb-3">
-                            <i class="bi bi-info-circle me-2 text-primary"></i>
-                            Cancellation rules
-                        </h6>
-
-                        <p class="small mb-0">
-                            You can cancel your registration up to 12 hours before the session begins.
-                            After this time, cancellation will no longer be possible.
-                        </p>
-                    </div>
+                            <p class="small mb-0">
+                                You can cancel your registration up to 12 hours before the session begins.
+                                After this time, cancellation will no longer be possible.
+                            </p>
+                        </div>
                 </div>
             </div>
         </div>
