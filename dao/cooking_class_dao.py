@@ -1,4 +1,3 @@
-import sqlite3
 from dao import utilities_dao
 
 def get_cooking_classes():
@@ -78,9 +77,9 @@ def get_available_spots(session_id):
     SELECT max_capacity - (
         SELECT COUNT(*) 
         FROM BOOKING 
-        WHERE CLASS_SESSION_id = cs.id AND status = 'ENROLLED') AS available_spots
-    FROM CLASS_SESSION cs
-    WHERE cs.id = ?
+        WHERE CLASS_SESSION_id = CLASS_SESSION.id AND status = 'ENROLLED') AS available_spots
+    FROM CLASS_SESSION
+    WHERE CLASS_SESSION.id = ?
     """, (session_id,))
 
     result = cursor.fetchone()

@@ -20,6 +20,11 @@
     height: 100px;
 }
 
+.detail-main-img {
+    height: 400px;
+    aspect-ratio: 1 / 1;
+}
+
 /* Offset superiore per la barra laterale sticky */
 .sticky-sidebar-offset {
     top: 5rem;

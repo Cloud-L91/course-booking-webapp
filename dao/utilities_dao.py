@@ -1,5 +1,11 @@
 import sqlite3
 
+FIRST_DAY = "Monday"
+LAST_DAY = "Sunday"
+CURRENT_DAY = "Wednesday"
+CURRENT_TIME = "13:00"
+MAX_ENROLLMENTS = 4
+
 DATABASE = "database/project3_database.db"
 
 def db_connect():
