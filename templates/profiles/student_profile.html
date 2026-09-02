@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}
+The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container my-4">
+    <a href="{{ url_for('home')}}" class="text-dark text-decoration-none">
+        <i class="bi bi-arrow-left"></i> Back to classes
+    </a>
+
+    <div class="row mt-4">
+        <div class="col-12">
+
+            <ul class="nav nav-tabs nav-justified">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#booked">
+                        <strong>Booked</strong>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#waiting">
+                        <strong>Waiting lists</strong>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#passed">
+                        <strong>Passed</strong>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="border border-top-0 rounded-bottom-3 p-3">
+                <div class="tab-content border rounded-3 p-3">
+
+                    <!-- PRENOTATI -->
+
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for r in registrations %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <img src="{{ url_for('static', filename='img/classes/' ~ r.photo_1) }}"
+                                    class="card-img-top object-fit-cover" style="height: 160px;" alt="{{ r.title }}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title fw-bold mb-0">{{ r.title }}</h5>
+                                        <span class="badge bg-success">Booked</span>
+                                    </div>
+
+                                    <p class="card-text text-muted small mb-3">
+                                        {{ r.cuisine }} &bull; Chef {{ r.chef_name }}
+                                    </p>
+
+                                    <ul class="list-unstyled small text-secondary mb-3">
+                                        <li><i class="bi bi-calendar3 me-1"></i> {{ r.day_of_week }} at {{ r.start_time
+                                            }}</li>
+                                        <li><i class="bi bi-clock me-1"></i> {{ r.duration }} min</li>
+                                        <li><i class="bi bi-geo-alt me-1"></i> {{ r.kitchen }}</li>
+                                    </ul>
+
+                                    <form method="POST" action="{{ url_for('delete_booking', session_id=r.id) }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                            Cancel booking
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12 text-center py-5 text-muted">
+                            <p class="mb-0">Non hai ancora effettuato alcuna prenotazione.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- IN ATTESA -->
+
+                <div id="waiting" class="tab-pane fade">
+                    <table class="table table-hover caption-top">
+                        <caption>List of users</caption>
+                        <thead class="table-secondary">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Class</th>
+                                <th scope="col">Date/Time</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Kitchen</th>
+                                <th scope="col">Position in list</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">1</th>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>@mdo</td>
+                                <td>Giangi</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">2</th>
+                                <td>Jacob</td>
+                                <td>Thornton</td>
+                                <td>@fat</td>
+                                <td>Giangi</td>
+                                <td>5</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">3</th>
+                                <td>Larry</td>
+                                <td>the Bird</td>
+                                <td>@twitter</td>
+                                <td>Giangi</td>
+                                <td>2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PASSATE -->
+
+                <div id="passed" class="tab-pane fade">
+                    <table class="table table-hover caption-top">
+                        <caption>List of users</caption>
+                        <thead class="table-secondary">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Class</th>
+                                <th scope="col">Date/Time</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Kitchen</th>
+                                <th scope="col">Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">1</th>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>@mdo</td>
+                                <td>Giangi</td>
+                                <td>2/5</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">2</th>
+                                <td>Jacob</td>
+                                <td>Thornton</td>
+                                <td>@fat</td>
+                                <td>Giangi</td>
+                                <td>2/5</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">3</th>
+                                <td>Larry</td>
+                                <td>the Bird</td>
+                                <td>@twitter</td>
+                                <td>Giangi</td>
+                                <td>2/5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+
+{% endblock %}

@@ -16,7 +16,7 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-    <header class="sticky-top py-2 text-bg-dark">
+    <header class="fixed-top py-2 text-bg-dark">
         <div class="container">
             <div class="d-flex flex-wrap align-items-center">
                 <a href="{{ url_for('home') }}" class="d-flex align-items-center me-3 text-white text-decoration-none">
@@ -48,7 +48,7 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a href="#" class="dropdown-item">Profile</a></li>
+                            <li><a href="{{ url_for('profile') }}" class="dropdown-item">Profile</a></li>
                             <li><a href="{{ url_for('logout') }}" class="dropdown-item">Sign out</a></li>
                         </ul>
                     </div>

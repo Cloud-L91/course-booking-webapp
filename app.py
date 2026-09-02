@@ -156,5 +156,29 @@ def delete_booking(session_id):
     
     return redirect(url_for("session_details", session_id=session_id))
 
+@app.route("/profile")
+@login_required
+def profile():
+    if current_user.role == "student":
+        # from here you will be redirected to the student profile route
+        return redirect(url_for("student_profile"))
+    elif current_user.role == "manager":
+        return redirect(url_for("manager_profile"))
+    else:
+        return redirect(url_for("home"))
+
+@app.route("/student_profile")
+@login_required
+def student_profile():
+    sessions = booking_dao.get_user_bookings(current_user.email)
+    return render_template("profiles/student_profile.html", sessions=sessions)
+
+@app.route("/manager_profile")
+@login_required
+def manager_profile():
+    #TODO
+    pass
+
+
 if __name__ == "__main__":
     app.run(debug=True)

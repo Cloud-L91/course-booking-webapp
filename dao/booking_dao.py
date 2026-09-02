@@ -50,3 +50,17 @@ def delete_booking(user_email, session_id, day, time):
 
     utilities_dao.close_connection(conn, cursor)
     return True
+
+def get_user_bookings(user_email):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT * 
+        FROM BOOKING 
+        WHERE BOOKING.USER_email = ?
+    """, (user_email,))
+    bookings = cursor.fetchall()
+
+    utilities_dao.close_connection(conn, cursor)
+    return bookings

@@ -6,6 +6,7 @@ html {
 }
 
 body {
+    padding-top: 60px;
     overflow-x: hidden;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }

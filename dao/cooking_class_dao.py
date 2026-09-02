@@ -1,10 +1,10 @@
 from dao import utilities_dao
 
-def get_cooking_classes():
+def get_all_classes_per_manager(manager_email):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM cooking_class")
+    cursor.execute("SELECT * FROM cooking_class WHERE manager_email = ?", (manager_email,))
 
     cooking_classes = cursor.fetchall()
 
