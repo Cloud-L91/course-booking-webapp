@@ -15,6 +15,7 @@ login_manager.login_view = "login"
 @app.route("/")
 def home():
     session_classes = cooking_class_dao.get_all_sessions()
+    session_classes.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
     return render_template("public/index.html", session_classes=session_classes)
 
 @app.route("/session_details/<int:session_id>")
@@ -177,7 +178,6 @@ def delete_booking(session_id):
 @login_required
 def profile():
     if current_user.role == "student":
-        # from here you will be redirected to the student profile route
         return redirect(url_for("student_profile"))
     elif current_user.role == "manager":
         return redirect(url_for("manager_profile"))
@@ -188,6 +188,7 @@ def profile():
 @login_required
 def student_profile():
     booked_sessions = booking_dao.get_user_enrolled_sessions(current_user.email)
+    booked_sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
     return render_template("profiles/student_profile.html", booked_sessions=booked_sessions)
 
 @app.route("/manager_profile")

@@ -37,7 +37,6 @@ def get_all_sessions():
     utilities_dao.close_connection(conn, cursor)
     return sessions
 
-
 def get_single_session(session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
@@ -48,6 +47,7 @@ def get_single_session(session_id):
     JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
     WHERE CLASS_SESSION.id = ?
     """, (session_id,))
+
     session = cursor.fetchone()
 
     utilities_dao.close_connection(conn, cursor)
@@ -63,6 +63,7 @@ def get_ingredients(cooking_class_id):
     FROM INGREDIENT
     WHERE COOKING_CLASS_id = ?
     """, (cooking_class_id,))
+    
     ingredients = cursor.fetchall()
 
     utilities_dao.close_connection(conn, cursor)

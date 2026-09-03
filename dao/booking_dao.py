@@ -7,7 +7,6 @@ def enroll_user_in_session(status, session_id, user_email,):
     cursor.execute("INSERT INTO BOOKING (status, CLASS_SESSION_id, USER_email) VALUES (?, ?, ?)", (status, session_id, user_email))
     utilities_dao.close_connection(conn, cursor)
 
-
 def check_existing_booking(user_email, session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()

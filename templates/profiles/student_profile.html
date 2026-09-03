@@ -51,8 +51,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                         <p class="card-text mb-3">{{ bs.cuisine }} • Chef {{ bs.chef_name }}</p>
 
                                         <ul class="list-unstyled small mb-3">
-                                            <li><i class="bi bi-calendar3 me-1"></i> {{ bs.day_of_week }} at {{
-                                                bs.start_time }}</li>
+                                            <li><i class="bi bi-calendar3 me-1"></i> {{ bs.day_of_week }} at {{ bs.start_time }}</li>
                                             <li><i class="bi bi-clock me-1"></i> {{ bs.duration }} min</li>
                                             <li><i class="bi bi-geo-alt me-1"></i> {{ bs.kitchen }}</li>
                                         </ul>
