@@ -23,16 +23,30 @@ def session_details(session_id):
     ingredients = cooking_class_dao.get_ingredients(session_class["COOKING_CLASS_id"])
     available_spots = cooking_class_dao.get_available_spots(session_id)
 
+    day = session_class["day_of_week"]
+    time = session_class["start_time"]
+    duration = session_class["duration"]
+    deletable = booking_dao.check_delete_eligibility(day, time)
+    passed_session = booking_dao.check_end_of_session(day, time, duration)
+
     user_status = None
+    max_bookings_reached = False
+
     if current_user.is_authenticated and current_user.role == "student":
         user_status = booking_dao.check_existing_booking(current_user.email, session_id)
+        total_enrollments = booking_dao.count_user_enrollments(current_user.email)
+        max_bookings_reached = (total_enrollments >= utilities_dao.MAX_ENROLLMENTS)
 
     return render_template(
         "public/session_details.html",
         session_class=session_class,
         ingredients=ingredients,
         available_spots=available_spots,
-        user_status=user_status)
+        user_status=user_status,
+        passed_session=passed_session,
+        max_bookings_reached=max_bookings_reached,
+        deletable=deletable
+        )
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -144,15 +158,18 @@ def delete_booking(session_id):
         if current_user.role != "student":
             return redirect(url_for("session_details", session_id=session_id))
 
-    session_class = cooking_class_dao.get_single_session(session_id)
-    day = session_class["day_of_week"]
-    time = session_class["start_time"]
+        session_class = cooking_class_dao.get_single_session(session_id)
+        day = session_class["day_of_week"]
+        time = session_class["start_time"]
 
-    success = booking_dao.delete_booking(current_user.email, session_id, day, time)
+        if not booking_dao.check_delete_eligibility(day, time):
+            return redirect(url_for("session_details", session_id=session_id))
 
-    if success:
-        # TODO: LOGICA DI SCORRIMENTO DELLA LISTA DI ATTESA
-        pass
+        success = booking_dao.delete_booking(current_user.email, session_id, day, time)
+
+        if success:
+            # TODO: LOGICA DI SCORRIMENTO DELLA LISTA DI ATTESA
+            pass
     
     return redirect(url_for("session_details", session_id=session_id))
 
@@ -170,8 +187,8 @@ def profile():
 @app.route("/student_profile")
 @login_required
 def student_profile():
-    sessions = booking_dao.get_user_bookings(current_user.email)
-    return render_template("profiles/student_profile.html", sessions=sessions)
+    booked_sessions = booking_dao.get_user_enrolled_sessions(current_user.email)
+    return render_template("profiles/student_profile.html", booked_sessions=booked_sessions)
 
 @app.route("/manager_profile")
 @login_required

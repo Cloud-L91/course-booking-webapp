@@ -1,4 +1,4 @@
--- 1. Inserimento della Cooking Class (assegnata al manager Jill Valentine)
+-- 1. Inserimento della Cooking Class (assegnata al manager Cave Johnson)
 INSERT INTO COOKING_CLASS (
     title, 
     cuisine, 
@@ -12,29 +12,29 @@ INSERT INTO COOKING_CLASS (
     photo_3, 
     USER_email
 ) VALUES (
-    'NYC Smash Burger & BBQ',
-    'American',
-    150,
-    'Beginner',
-    'Joe Bastianich',
-    'A masterclass on authentic New York comfort food: from achieving the perfect Maillard reaction on a smash burger to glazing the ribs. No shortcuts, top-quality meat, and zero margin for error—unless you want to hear: "You want me to drop dead?"',
+    'The Aperture Science Experimental Cake',
+    'Bakery',
+    120,
+    'Advanced',
+    'GLaDOS',
+    'A rich Black Forest preparation enriched with proprietary Aperture compounds. Pay no attention to any thermal discouragement beams or incinerators along the way. The Enrichment Center is required to remind you that you will be baked, and then there will be cake.',
     'Standard',
-    'burger_1.jpg',
-    'burger_2.jpg',
-    'burger_3.jpg',
-    'jill.valentine@example.com'
+    'cake_1.jpg',
+    'cake_2.jpg',
+    'cake_3.jpg',
+    'cave.johnson@aperture.com'
 );
 
--- 2. Inserimento degli ingredienti collegati all'ultimo corso inserito
+-- 2. Inserimento degli ingredienti collegati alla classe (id = 4)
 INSERT INTO INGREDIENT (name, COOKING_CLASS_id) VALUES 
-('Black Angus ground chuck blend', 2),
-('Sharp aged Cheddar cheese', 2),
-('Smoked streaky bacon', 2),
-('Artisanal brioche buns', 2),
-('Dill pickle slices', 2),
-('Kansas City style BBQ sauce', 2),
-('Caramelized sweet onions', 2),
-('Salted butter', 2);
+('Unsweetened cocoa powder', 4),
+('Companion Cube Fragments', 4),
+('Combustible lemons', 4),
+('Fish-shaped solid waste', 4),
+('Sediment-shaped sediment', 4),
+('Enriched 00 wheat flour', 4),
+('Black cherries in syrup', 4),
+('Purified neurotoxin', 4);
 
 -- 3. Inserimento di due sessioni settimanali per il corso
 INSERT INTO CLASS_SESSION (
@@ -44,5 +44,5 @@ INSERT INTO CLASS_SESSION (
     kitchen, 
     COOKING_CLASS_id
 ) VALUES 
-(10, '19:30', 'Thursday', 'Master Kitchen', (SELECT id FROM COOKING_CLASS WHERE title = 'NYC Smash Burger & BBQ')),
-(8, '20:30', 'Saturday', 'Kitchen 1 (Ovens)', (SELECT id FROM COOKING_CLASS WHERE title = 'NYC Smash Burger & BBQ'));
+(8, '16:00', 'Thuesday', 'Test Chamber 17', (SELECT id FROM COOKING_CLASS WHERE title = 'The Aperture Science Experimental Cake')),
+(6, '21:00', 'Saturday', 'Incinerator Room', (SELECT id FROM COOKING_CLASS WHERE title = 'The Aperture Science Experimental Cake'));

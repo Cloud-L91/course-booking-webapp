@@ -1,4 +1,4 @@
-from dao import utilities_dao, cooking_class_dao
+from dao import utilities_dao
 
 def enroll_user_in_session(status, session_id, user_email,):
     conn = utilities_dao.db_connect()
@@ -39,6 +39,18 @@ def count_user_enrollments(user_email):
 
     return enrollment_count
 
+def check_delete_eligibility(day, time):
+    session_time = utilities_dao.get_week_time(day, time)
+    current_time = utilities_dao.get_week_time(utilities_dao.CURRENT_DAY, utilities_dao.CURRENT_TIME)
+    return session_time - current_time >= utilities_dao.MIN_TIME_BEFORE_SESSION
+
+def check_end_of_session(day, time, duration):
+    session_start_time = utilities_dao.get_week_time(day, time)
+    session_duration = utilities_dao.get_minutes(duration)
+    session_end_time = session_start_time + session_duration
+    current_time = utilities_dao.get_week_time(utilities_dao.CURRENT_DAY, utilities_dao.CURRENT_TIME)
+    return current_time >= session_end_time
+
 def delete_booking(user_email, session_id, day, time):
     if day == utilities_dao.CURRENT_DAY and time < utilities_dao.CURRENT_TIME:
         return False
@@ -64,3 +76,30 @@ def get_user_bookings(user_email):
 
     utilities_dao.close_connection(conn, cursor)
     return bookings
+
+def get_user_enrolled_sessions(user_email):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT 
+            CLASS_SESSION.id,
+            COOKING_CLASS.title,
+            COOKING_CLASS.cuisine,
+            COOKING_CLASS.chef_name,
+            COOKING_CLASS.duration,
+            CLASS_SESSION.day_of_week,
+            CLASS_SESSION.start_time,
+            CLASS_SESSION.kitchen,
+            BOOKING.rating
+        FROM BOOKING, CLASS_SESSION, COOKING_CLASS
+        WHERE BOOKING.CLASS_SESSION_id = CLASS_SESSION.id
+          AND CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
+          AND BOOKING.USER_email = ?
+          AND BOOKING.status = 'ENROLLED'
+    """
+    cursor.execute(query, (user_email,))
+    booked_sessions = cursor.fetchall()
+
+    utilities_dao.close_connection(conn, cursor)
+    return booked_sessions

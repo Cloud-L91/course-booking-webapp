@@ -10,22 +10,23 @@
     background-color: rgba(0, 0, 0, 0.65);
 }
 
-/* Altezza fissa immagine card in home */
 .card-session-img {
     height: 200px;
 }
 
-/* Altezza fissa miniature secondarie nei dettagli */
 .detail-thumb-img {
     height: 100px;
 }
 
 .detail-main-img {
-    height: 400px;
+    height: 300px;
     aspect-ratio: 1 / 1;
 }
 
-/* Offset superiore per la barra laterale sticky */
 .sticky-sidebar-offset {
     top: 6rem;
+}
+
+#sessions-list {
+    scroll-margin-top: 60px;
 }

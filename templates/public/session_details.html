@@ -54,14 +54,12 @@ The cake is a lie - {{ session_class.title }}
                         <span class="text-muted small">({{ total_votes }} voti)</span>
                     </div>
 
-
-
-                    <p class="text-muted small">{{ session_class.description }}</p>
+                    <p class="text-muted">{{ session_class.description }}</p>
                 </div>
             </div>
 
-            <div class="mt-4">
-                <h4 class="fw-bold mb-3">Details</h4>
+            <div class="mt-5">
+                <h4 class="fw-bold mb-4">Details</h4>
                 <div class="card overflow-hidden">
                     <div class="row g-0">
                         <div class="col-md-6">
@@ -87,7 +85,7 @@ The cake is a lie - {{ session_class.title }}
                 </div>
             </div>
 
-            <div class="mt-4">
+            <div class="mt-5">
                 <h4 class="fw-bold mb-3">Ingredients</h4>
                 <div class="card border-0 p-3">
                     <ul class="list-unstyled mb-0">
@@ -120,58 +118,100 @@ The cake is a lie - {{ session_class.title }}
                     <!-- UTENTE ANONIMO -->
 
                     {% if not current_user.is_authenticated %}
-                    <a href="{{ url_for('login') }}" class="btn btn-primary w-100 py-2 fw-semibold mb-3">
-                        Log in to participate
-                    </a>
+                        {% if passed_session %}
+                            <button class="btn btn-secondary w-100 py-2 fw-semibold mb-3" disabled>Session ended</button>
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-primary w-100 py-2 fw-semibold mb-3">
+                                Log in to participate
+                            </a>
+                        {% endif %}
 
                     <!-- UTENTE STUDENTE -->
 
                     {% elif current_user.role == 'student' %}
 
-                    <!-- STATUS STUDENTE -->
+                    <!-- SE SESSIONE PASSATA -->
 
-                    {% if user_status == 'ENROLLED' %}
-                    <div class="alert alert-success d-flex align-items-center mb-3 py-2" role="alert">
-                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                        <p class="mb-0">You are already registered for this session!</p>
-                    </div>
-                    <br>
-                    <form method="POST" action="{{ url_for('delete_booking', session_id=session_class.id) }}">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Cancel booking</button>
-                    </form>
+                        {% if passed_session %}
+                            <div class="alert alert-secondary d-flex align-items-center mb-3 py-2" role="alert">
+                                <i class="bi bi-clock-history me-2 fs-5"></i>
+                                <p class="mb-0">This session has ended.</p>
+                            </div>
 
-                    {% elif user_status == 'WAITING' %}
-                    <div class="alert alert-warning d-flex align-items-center mb-3 py-2" role="alert">
-                        <i class="bi bi-clock-history me-2 fs-5"></i>
-                        <p class="mb-0">You are already on the waiting list for this session.</p>
-                    </div>
+                            {% if user_status == 'ENROLLED' %}
+                                <button class="btn btn-outline-success w-100 py-2 fw-semibold mb-3" disabled>
+                                    <i class="bi bi-check2-circle me-1"></i> You attended this session
+                                </button>
 
-                    {% else %}
+                            {% endif %}
 
-                    <!-- SE LO STUDENTE NON È ISCRITTO -->
+                    <!-- STATUS ENROLLED -->
 
-                    {% if available_spots > 0 %}
-                    <form method="POST" action="{{ url_for('enroll', session_id=session_class.id) }}">
-                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold mb-3">
-                            Sign up for the session
-                        </button>
-                    </form>
-                    {% else %}
-                    <button class="btn btn-secondary w-100 py-2 fw-semibold mb-3" disabled>Fully booked</button>
+                        {% elif user_status == 'ENROLLED' %}
+                        <div class="alert alert-success d-flex align-items-center mb-3 py-2" role="alert">
+                            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                            <p class="mb-0">You are already registered for this session!</p>
+                        </div>
+                        <br>
 
-                    <hr class="my-4">
+                        <!-- SE ENTRO LE 12 ORE -->
 
-                    <h6 class="fw-bold mb-3">No spots available?</h6>
+                            {% if deletable %}
 
-                    <p class="text-muted small mb-1">Join the waiting list: you will be notified if a spot opens up.
-                    </p>
-                    <form method="POST" action="{{ url_for('enroll', session_id=session_class.id) }}">
-                        <button type="submit" class="btn btn-outline-success w-100 py-2 fw-semibold mb-3">
-                            Join the waiting list
-                        </button>
-                    </form>
-                    {% endif %}
-                    {% endif %}
+                            <form method="POST" action="{{ url_for('delete_booking', session_id=session_class.id) }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Cancel booking</button>
+                            </form>
+
+                            {% else %}
+                            <form>
+                                <button type="submit" class="btn btn-outline-secondary btn-sm disabled">Cancel booking</button>
+                            </form>
+                            {% endif %}
+
+                        <!-- STATUS WAITING -->
+
+                        {% elif user_status == 'WAITING' %}
+                        <div class="alert alert-warning d-flex align-items-center mb-3 py-2" role="alert">
+                            <i class="bi bi-clock-history me-2 fs-5"></i>
+                            <p class="mb-0">You are already on the waiting list for this session.</p>
+                        </div>
+
+                        {% else %}
+
+                        <!-- SE LO STUDENTE NON È ISCRITTO -->
+
+                            {% if available_spots > 0 %}
+                                {% if max_bookings_reached %}
+                                    <button class="btn btn-secondary w-100 py-2 fw-semibold mb-2" disabled>
+                                        Booking limit reached (4/4)
+                                    </button>
+                                    <p class="text-muted small mb-3">
+                                        You have already booked the maximum allowed of 4 active sessions.
+                                    </p>
+                                {% else%}
+                                    <form method="POST" action="{{ url_for('enroll', session_id=session_class.id) }}">
+                                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold mb-3">
+                                            Sign up for the session
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                            {% else %}
+                                <button class="btn btn-secondary w-100 py-2 fw-semibold mb-3" disabled>Fully booked</button>
+
+                                <hr class="my-4">
+
+                                <h6 class="fw-bold mb-3">No spots available?</h6>
+
+                                <p class="text-muted small mb-1">Join the waiting list: you will be notified if a spot opens up.
+                                </p>
+                                <form method="POST" action="{{ url_for('enroll', session_id=session_class.id) }}">
+                                    <button type="submit" class="btn btn-outline-success w-100 py-2 fw-semibold mb-3">
+                                        Join the waiting list
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
 
                     {% elif current_user.role == 'manager' %}
 

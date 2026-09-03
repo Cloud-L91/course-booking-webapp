@@ -4,6 +4,7 @@ Tifa Lockhart 		tifa.lockhart@example.com 		student 	tifa123
 Barry Burton 		barry.burton@example.com 		student 	barry123
 Eric Cartman 		eric.cartman@example.com 		student 	cartman123
 Ellen Ripley 		ellen.ripley@example.com 		student		ripley123
+Cave Johnson		cave.johnson@aperture.com		manager		cave123
 
 
 password1 = "tifa123"
