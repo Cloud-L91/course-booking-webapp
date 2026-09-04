@@ -33,25 +33,14 @@ The cake is a lie - {{ session_class.title }}
 
                     <!-- STELLINE -->
 
-                    {% set rating = 4.2 %}
-                    {% set total_votes = 18 %}
-
                     <div class="d-flex align-items-center mb-3">
-
                         <div class="text-warning me-2">
                             {% for i in range(1, 6) %}
-                            {% if rating >= i %}
-                            <i class="bi bi-star-fill"></i>
-                            {% elif rating >= (i - 0.5) %}
-                            <i class="bi bi-star-half"></i>
-                            {% else %}
-                            <i class="bi bi-star"></i>
-                            {% endif %}
+                                <i class="bi bi-star{{ '-fill' if rating >= i else '' }}"></i>
                             {% endfor %}
                         </div>
-
                         <span class="fw-bold text-dark me-1">{{ "%.1f"|format(rating) }}</span>
-                        <span class="text-muted small">({{ total_votes }} voti)</span>
+                        <span class="text-muted small">({{ total_votes }} votes)</span>
                     </div>
 
                     <p class="text-muted">{{ session_class.description }}</p>
@@ -198,13 +187,9 @@ The cake is a lie - {{ session_class.title }}
 
                             {% else %}
                                 <button class="btn btn-secondary w-100 py-2 fw-semibold mb-3" disabled>Fully booked</button>
-
                                 <hr class="my-4">
-
                                 <h6 class="fw-bold mb-3">No spots available?</h6>
-
-                                <p class="text-muted small mb-1">Join the waiting list: you will be notified if a spot opens up.
-                                </p>
+                                <p class="text-muted small mb-1">Join the waiting list: you will be notified if a spot opens up.</p>
                                 <form method="POST" action="{{ url_for('enroll', session_id=session_class.id) }}">
                                     <button type="submit" class="btn btn-outline-success w-100 py-2 fw-semibold mb-3">
                                         Join the waiting list
@@ -235,7 +220,6 @@ The cake is a lie - {{ session_class.title }}
             </div>
         </div>
     </div>
-
 
 </div>
 

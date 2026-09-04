@@ -89,3 +89,22 @@ def get_available_spots(session_id):
     if result and result[0] is not None:
         return int(result[0])
     return 0
+
+def get_class_rating(cooking_class_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT AVG(rating) AS average_rating, COUNT(rating) AS tot_ratings
+        FROM BOOKING, CLASS_SESSION
+        WHERE BOOKING.CLASS_SESSION_id = CLASS_SESSION.id
+          AND CLASS_SESSION.COOKING_CLASS_id = ?
+          AND BOOKING.rating IS NOT NULL
+        """
+    cursor.execute(query, (cooking_class_id,))
+    result = cursor.fetchone()
+    utilities_dao.close_connection(conn, cursor)
+
+    if result and result["average_rating"] is not None:
+        return float(result["average_rating"]), int(result["tot_ratings"])
+    return None, 0

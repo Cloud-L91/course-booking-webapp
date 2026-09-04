@@ -64,4 +64,19 @@ Quando una sessione è piena, uno studente può iscriversi alla sua lista d'atte
 - visibile ai responsabili
 
 
+IL DATABASE DEVE CONTENERE ALMENO LE SEGUENTI COSE
+
+- 2 manager
+- 4 studenti
+- diverse classes con caratteristiche diverse
+- diverse sessions per class nei vari giorni
+- iscrizioni già avvenute di cui:
+-- almeno 1 piena
+-- almeno 1 vuota ancora modificabile
+-- almeno 1 passata ed 1 futura
+-- alcune valutazioni
+
+FORNIRE CREDENZIALI DEGLI ACCOUNT, GIORNO E TEMPO SIMULATO
+
+
 CONSEGNA ENTRO LE 23:59 DEL 13 SETTEMBRE 2026

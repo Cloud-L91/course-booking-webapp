@@ -38,6 +38,8 @@ def session_details(session_id):
         total_enrollments = booking_dao.count_user_enrollments(current_user.email)
         max_bookings_reached = (total_enrollments >= utilities_dao.MAX_ENROLLMENTS)
 
+    rating, total_votes = cooking_class_dao.get_class_rating(session_class["COOKING_CLASS_id"])
+
     return render_template(
         "public/session_details.html",
         session_class=session_class,
@@ -46,6 +48,8 @@ def session_details(session_id):
         user_status=user_status,
         passed_session=passed_session,
         max_bookings_reached=max_bookings_reached,
+        rating=rating,
+        total_votes=total_votes,
         deletable=deletable
         )
 
@@ -174,6 +178,21 @@ def delete_booking(session_id):
     
     return redirect(url_for("session_details", session_id=session_id))
 
+@app.route("/rate_session/<int:session_id>", methods=["POST"])
+@login_required
+def rate_session(session_id):
+    if request.method == "POST":
+        if current_user.role != "student":
+            return redirect(url_for("session_details", session_id=session_id))
+
+        rating = request.form.get("rating", type=int)
+        current_rating = booking_dao.get_user_rating(current_user.email, session_id)
+
+        if current_rating is None and rating and 1 <= rating <= 5:
+            booking_dao.set_user_rating(current_user.email, session_id, rating)
+
+    return redirect(url_for("student_profile"))
+
 @app.route("/profile")
 @login_required
 def profile():
@@ -187,16 +206,43 @@ def profile():
 @app.route("/student_profile")
 @login_required
 def student_profile():
-    booked_sessions = booking_dao.get_user_enrolled_sessions(current_user.email)
-    booked_sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
-    return render_template("profiles/student_profile.html", booked_sessions=booked_sessions)
+    all_sessions = booking_dao.get_user_enrolled_sessions(current_user.email)
+    all_sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
+
+    upcoming_sessions = []
+    past_sessions = []
+
+    for session in all_sessions:
+        day = session["day_of_week"]
+        time = session["start_time"]
+        duration = session["duration"]
+
+        if booking_dao.check_end_of_session(day, time, duration):
+            past_sessions.append(session)
+        else:
+            upcoming_sessions.append(session)
+
+    return render_template("profiles/student_profile.html", upcoming_sessions=upcoming_sessions, past_sessions=past_sessions)
 
 @app.route("/manager_profile")
 @login_required
 def manager_profile():
-    #TODO
-    pass
 
+    return render_template("profiles/manager_profile.html")
+
+@app.route("/create_class", methods=["GET", "POST"])
+@login_required
+def create_class():
+    #TODO
+
+    return render_template("/profiles/create_class.html")
+
+@app.route("/create_session", methods=["GET", "POST"])
+@login_required
+def create_class():
+    #TODO
+
+    return render_template("/profiles/create_session.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

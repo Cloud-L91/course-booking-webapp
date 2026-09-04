@@ -5,5 +5,9 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
 {% endblock %}
 
 {% block content %}
-
+<div class="container my-4">
+    <a href="{{ url_for('create_class') }}" class="btn btn-primary btn-lg">
+        Create New Class
+    </a>
+</div>
 {% endblock %}

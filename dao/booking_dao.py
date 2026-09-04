@@ -102,3 +102,40 @@ def get_user_enrolled_sessions(user_email):
 
     utilities_dao.close_connection(conn, cursor)
     return booked_sessions
+
+def get_user_rating(user_email, session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT rating
+        FROM BOOKING
+        WHERE USER_email = ? AND CLASS_SESSION_id = ?
+    """
+    cursor.execute(query, (user_email, session_id))
+    rating = cursor.fetchone()
+
+    utilities_dao.close_connection(conn, cursor)
+
+    if rating:
+        return rating["rating"]
+    else:
+        return None
+
+def set_user_rating(user_email, session_id, rating):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        UPDATE BOOKING
+        SET rating = ?
+        WHERE USER_email = ? AND CLASS_SESSION_id = ? AND rating IS NULL
+    """
+
+    cursor.execute(query, (rating, user_email, session_id))
+    success = cursor.rowcount > 0
+
+    utilities_dao.close_connection(conn, cursor)
+
+    return success
+    

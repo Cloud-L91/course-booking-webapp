@@ -39,24 +39,24 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
 
                     <div id="booked" class="tab-pane fade show active">
                         <div class="row row-cols-1 row-cols-md-2 g-4">
-                            {% for bs in booked_sessions %}
+                            {% for upcoming in upcoming_sessions %}
                             <div class="col">
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h5 class="card-title fw-bold mb-0">{{ bs.title }}</h5>
+                                            <h5 class="card-title fw-bold mb-0">{{ upcoming.title }}</h5>
                                             <span class="badge bg-success">Booked</span>
                                         </div>
 
-                                        <p class="card-text mb-3">{{ bs.cuisine }} • Chef {{ bs.chef_name }}</p>
+                                        <p class="card-text mb-3">{{ upcoming.cuisine }} • Chef {{ upcoming.chef_name }}</p>
 
                                         <ul class="list-unstyled small mb-3">
-                                            <li><i class="bi bi-calendar3 me-1"></i> {{ bs.day_of_week }} at {{ bs.start_time }}</li>
-                                            <li><i class="bi bi-clock me-1"></i> {{ bs.duration }} min</li>
-                                            <li><i class="bi bi-geo-alt me-1"></i> {{ bs.kitchen }}</li>
+                                            <li><i class="bi bi-calendar3 me-1"></i> {{ upcoming.day_of_week }} at {{ upcoming.start_time }}</li>
+                                            <li><i class="bi bi-clock me-1"></i> {{ upcoming.duration }} min</li>
+                                            <li><i class="bi bi-geo-alt me-1"></i> {{ upcoming.kitchen }}</li>
                                         </ul>
 
-                                        <a href="{{ url_for('session_details', session_id=bs.id) }}"
+                                        <a href="{{ url_for('session_details', session_id=upcoming.id) }}"
                                             class="btn btn-outline-success btn-sm w-100">
                                             <i class="bi bi-info-circle me-1"></i> View details
                                         </a>
@@ -130,32 +130,38 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                     <th scope="col">Rating</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <th scope="row">1</th>
-                                    <td>Mark</td>
-                                    <td>Otto</td>
-                                    <td>@mdo</td>
-                                    <td>Giangi</td>
-                                    <td>2/5</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">2</th>
-                                    <td>Jacob</td>
-                                    <td>Thornton</td>
-                                    <td>@fat</td>
-                                    <td>Giangi</td>
-                                    <td>2/5</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">3</th>
-                                    <td>Larry</td>
-                                    <td>the Bird</td>
-                                    <td>@twitter</td>
-                                    <td>Giangi</td>
-                                    <td>2/5</td>
-                                </tr>
-                            </tbody>
+                            {% for passed in past_sessions %}
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">{{ loop.index }}</th>
+                                        <td>{{ passed.cuisine }} • Chef {{ passed.chef_name }}</td>
+                                        <td>{{ passed.day_of_week }} at {{ passed.start_time }}</td>
+                                        <td>{{ passed.duration }} min</td>
+                                        <td>{{ passed.kitchen }}</td>
+                                        {% if passed.rating %}
+                                            <td>{{ passed.rating }}/5
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            </td>
+                                        {% else%}
+                                            <td>
+                                                <form action="{{ url_for('rate_session', session_id=passed.id) }}" method="POST" class="d-flex gap-1 align-items-center">
+                                                    <select name="rating" class="form-select form-select-sm" style="width: 75px;" required>
+                                                        <option value="" disabled selected>-</option>
+                                                        <option value="5">5 ★</option>
+                                                        <option value="4">4 ★</option>
+                                                        <option value="3">3 ★</option>
+                                                        <option value="2">2 ★</option>
+                                                        <option value="1">1 ★</option>
+                                                    </select>
+                                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                                        Send
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        {% endif%}
+                                    </tr>
+                                </tbody>
+                            {% endfor %}
                         </table>
                     </div>
                 </div>
