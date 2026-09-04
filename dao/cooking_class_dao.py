@@ -141,3 +141,14 @@ def get_class_rating(cooking_class_id):
     if result and result["average_rating"] is not None:
         return float(result["average_rating"]), int(result["tot_ratings"])
     return None, 0
+
+def add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user_email):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO COOKING_CLASS (title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, USER_email)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user_email))
+
+    utilities_dao.close_connection(conn, cursor)

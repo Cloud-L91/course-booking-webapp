@@ -116,8 +116,8 @@ def register():
     
         if not success:
             return render_template("authentication/register.html", error="Failed to register user") 
-
-        return redirect(url_for("login"))
+        else:
+            return redirect(url_for("login"))
     return render_template("authentication/register.html")
 
 @login_manager.user_loader
@@ -240,6 +240,31 @@ def manager_profile():
 def create_class():
     if current_user.role != "manager":
         return redirect(url_for("home"))
+
+    if request.method == "POST":
+        
+        title = request.form.get("title")
+        cuisine = request.form.get("cuisine")
+        duration = request.form.get("duration", type=int)
+        difficulty = request.form.get("difficulty")
+        chef_name = request.form.get("chef_name")
+        description = request.form.get("description")
+        dietary_category = request.form.get("dietary_category")
+        file_1 = request.files.get("photo_1")
+        file_2 = request.files.get("photo_2")
+        file_3 = request.files.get("photo_3")
+
+        photo_1 = file_1.filename if file_1 else None
+        photo_2 = file_2.filename if file_2 else None
+        photo_3 = file_3.filename if file_3 else None
+
+        for f in [file_1, file_2, file_3]:
+            if f and f.filename:
+                f.save(f"static/img/classes/{f.filename}")
+
+        cooking_class_dao.add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user.email)
+
+        return redirect(url_for("manager_profile"))
 
     return render_template("/manager/create_class.html")
 

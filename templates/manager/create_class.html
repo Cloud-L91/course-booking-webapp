@@ -7,84 +7,80 @@ The cake is a lie - Create class
 {% block content %}
 <section class="form-card">
     <div class="register-box register-class">
-        <form form-signin w-100 m-auto method="POST" enctype="multipart/form-data">
+        <form form-signin w-100 m-auto method="POST" action="{{ url_for('create_class') }}"
+            enctype="multipart/form-data">
 
 
             <div class="col-12 mb-3">
                 <label for="validationDefault01">Title</label>
-                <input type="text" class="form-control" id="validationDefault01" placeholder="" value=""
-                required>
+                <input type="text" class="form-control" id="title" name="title" required>
             </div>
+
             <div class="row g-3">
                 <div class="col-md-6 mb-3">
-                    <label for="validationDefault02">Cuisine</label>
-                    <input type="text" class="form-control" id="validationDefault02" placeholder="" value=""
-                        required>
+                    <label for="cuisine">Cuisine</label>
+                    <input type="text" class="form-control" id="cuisine" name="cuisine" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="validationDefaultUsername">Chef</label>
+                    <label for="chef">Chef</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="validationDefaultUsername" placeholder=""
-                            aria-describedby="inputGroupPrepend2" required>
+                        <input type="text" class="form-control" id="chef_name" name="chef_name" required>
                     </div>
                 </div>
             </div>
+
             <div class="row g-3">
                 <div class="col-md-4 mb-3">
-                    <label for="validationDefault03">Difficulty</label>
-                    <select id="inputState" class="form-select">
-                        <option selected>Choose...</option>
-                        <option>Beginner</option>
-                        <option>Intermediate</option>
-                        <option>Advanced</option>
+                    <label for="difficulty">Difficulty</label>
+                    <select id="difficulty" name="difficulty" class="form-select" required>
+                        <option value="" selected disabled>Choose...</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="validationDefault04">Duration (minutes)</label>
-                    <input type="text" class="form-control" id="validationDefault04" placeholder="" required>
+                    <label for="duration">Duration (minutes)</label>
+                    <input type="number" class="form-control" id="duration" name="duration" min="30" max="240" required>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="validationDefault05">Dietary category</label>
-                    <select id="inputState" class="form-select">
-                        <option selected>Choose...</option>
-                        <option>Standard</option>
-                        <option>Vegetarian</option>
-                        <option>Vegan</option>
-                        <option>Gluten-free </option>
+                    <label for="dietary_category">Dietary category</label>
+                    <select id="dietary_category" name="dietary_category" class="form-select" required>
+                        <option value="" selected disabled>Choose...</option>
+                        <option value="Standard">Standard</option>
+                        <option value="Vegetarian">Vegetarian</option>
+                        <option value="Vegan">Vegan</option>
+                        <option value="Gluten-free">Gluten-free</option>
                     </select>
                 </div>
                 <div class="form-group mt-0">
-                    <label for="exampleFormControlTextarea1">Description </label>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                    <label for="description">Description </label>
+                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
                 </div>
             </div>
 
-            <div class="form-group mt-3">
-                <div class="form-check">
+            <div class="mt-3">
+                <div class="mb-3">
 
                     <div class="mb-3">
-                        <label for="cover_image">First photo</label>
-                        <input class="form-control" type="file" id="photo_1" name="photo_1" accept="image/*">
+                        <label for="photo_1">First photo</label>
+                        <input class="form-control" type="file" id="photo_1" name="photo_1" accept="image/*" required>
                     </div>
                     <div class="mb-3">
-                        <label for="cover_image">Second photo</label>
-                        <input class="form-control" type="file" id="photo_2" name="photo_2" accept="image/*">
+                        <label for="photo_2">Second photo</label>
+                        <input class="form-control" type="file" id="photo_2" name="photo_2" accept="image/*" required>
                     </div>
                     <div class="mb-4">
-                        <label for="cover_image">Third photo</label>
-                        <input class="form-control" type="file" id="photo_3" name="photo_3" accept="image/*">
+                        <label for="photo_3">Third photo</label>
+                        <input class="form-control" type="file" id="photo_3" name="photo_3" accept="image/*" required>
                     </div>
 
                     <button class="btn btn-primary py-2" type="submit">Send</button>
                     <button class="btn btn-secondary py-2" type="reset">Clear</button>
-
-
                 </div>
             </div>
 
-
         </form>
-
 
     </div>
 </section>
