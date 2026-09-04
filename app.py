@@ -222,27 +222,29 @@ def student_profile():
         else:
             upcoming_sessions.append(session)
 
-    return render_template("profiles/student_profile.html", upcoming_sessions=upcoming_sessions, past_sessions=past_sessions)
+    return render_template("student/student_profile.html", upcoming_sessions=upcoming_sessions, past_sessions=past_sessions)
 
 @app.route("/manager_profile")
 @login_required
 def manager_profile():
 
-    return render_template("profiles/manager_profile.html")
+    return render_template("manager/manager_profile.html")
 
 @app.route("/create_class", methods=["GET", "POST"])
 @login_required
 def create_class():
-    #TODO
+    if current_user.role != "manager":
+        return redirect(url_for("home"))
 
-    return render_template("/profiles/create_class.html")
+    return render_template("/manager/create_class.html")
 
 @app.route("/create_session", methods=["GET", "POST"])
 @login_required
-def create_class():
-    #TODO
+def create_session():
+    if current_user.role != "manager":
+        return redirect(url_for("home"))
 
-    return render_template("/profiles/create_session.html")
+    return render_template("/manager/create_session.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
