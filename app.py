@@ -15,14 +15,15 @@ login_manager.login_view = "login"
 @app.route("/")
 def home():
     session_classes = cooking_class_dao.get_all_sessions()
-    session_classes.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
     return render_template("public/index.html", session_classes=session_classes)
 
 @app.route("/session_details/<int:session_id>")
 def session_details(session_id):
     session_class = cooking_class_dao.get_single_session(session_id)
-    ingredients = cooking_class_dao.get_ingredients(session_class["COOKING_CLASS_id"])
+    ingredients = cooking_class_dao.get_ingredients_per_class(session_class["COOKING_CLASS_id"])
     available_spots = cooking_class_dao.get_available_spots(session_id)
+    name_manager = user_dao.get_user_by_email(session_class["USER_email"])
+    name_manager = f"{name_manager['first_name']} {name_manager['last_name']}"
 
     day = session_class["day_of_week"]
     time = session_class["start_time"]
@@ -50,7 +51,8 @@ def session_details(session_id):
         max_bookings_reached=max_bookings_reached,
         rating=rating,
         total_votes=total_votes,
-        deletable=deletable
+        deletable=deletable,
+        name_manager=name_manager
         )
 
 @app.route("/login", methods=["GET", "POST"])
@@ -227,8 +229,11 @@ def student_profile():
 @app.route("/manager_profile")
 @login_required
 def manager_profile():
-
-    return render_template("manager/manager_profile.html")
+    all_classes = cooking_class_dao.get_all_classes_per_manager(current_user.email)
+    session_classes = cooking_class_dao.get_sessions_per_manager(current_user.email)
+    all_ingredients = cooking_class_dao.get_all_ingredients()
+   
+    return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, all_ingredients=all_ingredients)
 
 @app.route("/create_class", methods=["GET", "POST"])
 @login_required

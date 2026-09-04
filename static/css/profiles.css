@@ -1,0 +1,9 @@
+.class-manager-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.badge-classes-mng {
+    background-color:rgb(5, 131, 87);
+}

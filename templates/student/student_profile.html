@@ -38,37 +38,39 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                     <!-- PRENOTATI -->
 
                     <div id="booked" class="tab-pane fade show active">
-                        <div class="row row-cols-1 row-cols-md-2 g-4">
-                            {% for upcoming in upcoming_sessions %}
-                            <div class="col">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between align-items-start mb-2">
-                                            <h5 class="card-title fw-bold mb-0">{{ upcoming.title }}</h5>
-                                            <span class="badge bg-success">Booked</span>
+                        {% if upcoming_sessions %}
+                            <div class="row row-cols-1 row-cols-md-2 g-4">
+                                {% for upcoming in upcoming_sessions %}
+                                <div class="col">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title fw-bold mb-0">{{ upcoming.title }}</h5>
+                                                <span class="badge bg-success">Booked</span>
+                                            </div>
+
+                                            <p class="card-text mb-3">{{ upcoming.cuisine }} • Chef {{ upcoming.chef_name }}</p>
+
+                                            <ul class="list-unstyled small mb-3">
+                                                <li><i class="bi bi-calendar3 me-1"></i> {{ upcoming.day_of_week }} at {{ upcoming.start_time }}</li>
+                                                <li><i class="bi bi-clock me-1"></i> {{ upcoming.duration }} min</li>
+                                                <li><i class="bi bi-geo-alt me-1"></i> {{ upcoming.kitchen }}</li>
+                                            </ul>
+
+                                            <a href="{{ url_for('session_details', session_id=upcoming.id) }}"
+                                                class="btn btn-outline-success btn-sm w-100">
+                                                <i class="bi bi-info-circle me-1"></i> View details
+                                            </a>
                                         </div>
-
-                                        <p class="card-text mb-3">{{ upcoming.cuisine }} • Chef {{ upcoming.chef_name }}</p>
-
-                                        <ul class="list-unstyled small mb-3">
-                                            <li><i class="bi bi-calendar3 me-1"></i> {{ upcoming.day_of_week }} at {{ upcoming.start_time }}</li>
-                                            <li><i class="bi bi-clock me-1"></i> {{ upcoming.duration }} min</li>
-                                            <li><i class="bi bi-geo-alt me-1"></i> {{ upcoming.kitchen }}</li>
-                                        </ul>
-
-                                        <a href="{{ url_for('session_details', session_id=upcoming.id) }}"
-                                            class="btn btn-outline-success btn-sm w-100">
-                                            <i class="bi bi-info-circle me-1"></i> View details
-                                        </a>
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
-                            {% else %}
-                            <div class="col-12 text-center py-5 text-muted">
-                                <p class="mb-0">You haven't made any reservations yet.</p>
-                            </div>
-                            {% endfor %}
+                        {% else %}
+                        <div class="col-12 text-center py-5 text-muted">
+                            <p class="mb-0">You haven't made any reservations yet.</p>
                         </div>
+                        {% endif %}
                     </div>
 
                     <!-- IN ATTESA -->
@@ -130,11 +132,16 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                     <th scope="col">Rating</th>
                                 </tr>
                             </thead>
-                            {% for passed in past_sessions %}
-                                <tbody>
-                                    <tr>
+                            <tbody>
+                                {% for passed in past_sessions %}
+                                    <tr class="align-middle">
                                         <th scope="row">{{ loop.index }}</th>
-                                        <td>{{ passed.cuisine }} • Chef {{ passed.chef_name }}</td>
+                                        <div>
+                                        <td>
+                                            <strong>{{ passed.title }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ passed.cuisine }} • Chef {{ passed.chef_name }}</small>
+                                        </td>
                                         <td>{{ passed.day_of_week }} at {{ passed.start_time }}</td>
                                         <td>{{ passed.duration }} min</td>
                                         <td>{{ passed.kitchen }}</td>
@@ -159,6 +166,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                                 </form>
                                             </td>
                                         {% endif%}
+                                        </div>
                                     </tr>
                                 </tbody>
                             {% endfor %}

@@ -4,9 +4,10 @@ def get_all_classes_per_manager(manager_email):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM cooking_class WHERE manager_email = ?", (manager_email,))
+    cursor.execute("SELECT * FROM cooking_class WHERE USER_email = ?", (manager_email,))
 
     cooking_classes = cursor.fetchall()
+    cooking_classes.sort(key=lambda c: c["id"], reverse=True)
 
     utilities_dao.close_connection(conn, cursor)
 
@@ -23,6 +24,26 @@ def get_single_cooking_class(id):
 
     return cooking_class
 
+def get_sessions_per_manager(manager_email):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT CLASS_SESSION.*,
+            (SELECT COUNT(*) FROM BOOKING WHERE BOOKING.CLASS_SESSION_id = CLASS_SESSION.id) AS enrolled_count
+        FROM CLASS_SESSION 
+        JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
+        WHERE COOKING_CLASS.USER_email = ?
+        """
+
+    cursor.execute(query, (manager_email,))
+    sessions = cursor.fetchall()
+
+    sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
+
+    utilities_dao.close_connection(conn, cursor)
+    return sessions
+
 def get_all_sessions():
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
@@ -33,6 +54,7 @@ def get_all_sessions():
     JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
     """)
     sessions = cursor.fetchall()
+    sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
 
     utilities_dao.close_connection(conn, cursor)
     return sessions
@@ -54,7 +76,7 @@ def get_single_session(session_id):
 
     return session
 
-def get_ingredients(cooking_class_id):
+def get_ingredients_per_class(cooking_class_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
@@ -64,6 +86,17 @@ def get_ingredients(cooking_class_id):
     WHERE COOKING_CLASS_id = ?
     """, (cooking_class_id,))
     
+    ingredients = cursor.fetchall()
+
+    utilities_dao.close_connection(conn, cursor)
+
+    return ingredients
+
+def get_all_ingredients():
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM ingredient")
     ingredients = cursor.fetchall()
 
     utilities_dao.close_connection(conn, cursor)

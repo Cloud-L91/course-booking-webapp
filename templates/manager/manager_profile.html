@@ -9,5 +9,199 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
     <a href="{{ url_for('create_class') }}" class="btn btn-primary btn-lg">
         Create New Class
     </a>
-</div>
-{% endblock %}
+
+
+
+    <div class="row g-2 my-3">
+
+        <div class="col-2">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="small fw-bold text-uppercase mb-2">Total classes</h6>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
+                        card's content.</p>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-2">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="small fw-bold text-uppercase mb-2">Total sessions</h6>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
+                        card's content.</p>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-2">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="small fw-bold text-uppercase mb-2">Total students</h6>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
+                        card's content.</p>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-2">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="small fw-bold text-uppercase mb-2">On waiting list</h6>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
+                        card's content.</p>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-2">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="small fw-bold text-uppercase mb-2">Popular cuisine</h6>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
+                        card's content.</p>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-2">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="small fw-bold text-uppercase mb-2">Highest rating</h6>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
+                        card's content.</p>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="border rounded-3 p-3 my-4">
+
+        {% if all_classes %}
+        <div class="accordion" id="classesAccordion">
+            {% for classes in all_classes %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-{{ classes.id }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse-{{ classes.id }}">
+                        <div class="d-flex justify-content-between align-items-center w-100 me-3">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ url_for('static', filename='img/classes/' ~ classes.photo_1) }}"
+                                    class="class-manager-img rounded flex-shrink-0 me-3" alt="">
+                                <span>
+                                    <strong>{{ classes.title }}</strong>
+                                    <br><br>
+                                    {{ classes.cuisine }} • Chef {{ classes.chef_name }} • {{ classes.duration }} min
+                                    per session
+                                </span>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <h6><span class="badge badge-classes-mng">{{ classes.difficulty }}</span></h6>
+                                <h6><span class="badge badge-classes-mng">{{ classes.dietary_category }}</span></h6>
+                            </div>
+
+                        </div>
+                    </button>
+                </h2>
+                <div id="collapse-{{ classes.id }}" class="accordion-collapse collapse"
+                    data-bs-parent="#classesAccordion">
+                    <div class="accordion-body">
+
+                        <div class="row g-0">
+                            <div class="col-md-4 text-start border-end">
+                                <strong>PROMOTIONAL PHOTOS</strong>
+                                <div class="align-middle mt-2">
+                                    <img src="{{ url_for('static', filename='img/classes/' ~ classes.photo_1) }}"
+                                        class="class-manager-img rounded flex-shrink-0 me-3" alt="">
+                                    <img src="{{ url_for('static', filename='img/classes/' ~ classes.photo_2) }}"
+                                        class="class-manager-img rounded flex-shrink-0 me-3" alt="">
+                                    <img src="{{ url_for('static', filename='img/classes/' ~ classes.photo_3) }}"
+                                        class="class-manager-img rounded flex-shrink-0 me-3" alt="">
+                                </div>
+                                <br>
+
+                                <strong>DESCRIPTION</strong><br>
+                                <span class="text-start">{{ classes.description }}</span>
+                                <br><br>
+                                <div class="mt-2">
+
+                                    <strong class="d-block mb-1">INGREDIENTS</strong>
+                                    {% for ing in all_ingredients %}
+                                        {% if ing.COOKING_CLASS_id == classes.id %}
+                                        <span class="badge bg-light text-dark border rounded-2 p-2 me-1 mb-1">{{ ing.name }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+                            <div class="col-md-4 text-start border-end">
+                                <strong class="d-block mb-1">SCHEDULED SESSIONS</strong>
+
+                                <table class="table table-sm table-hover align-middle border small mb-0 p-2">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Day/Time</th>
+                                            <th>Kitchen</th>
+                                            <th>Enrolled</th>
+                                            <th>Rating</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for s in session_classes %}
+                                        {% if s.COOKING_CLASS_id == classes.id %}
+                                        <tr class="align-middle mt-2">
+                                            <td class="fw-semibold text-dark">{{ s.day_of_week }} at {{ s.start_time }}
+                                            </td>
+                                            <td>{{ s.kitchen }}</td>
+                                            <td>{{ s.enrolled_count }}/{{ s.max_capacity }}</td>
+                                            <td>RATING</td>
+                                        </tr>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+
+
+
+                            </div>
+                            <div class="col-md-4 text-center">.col-md-4</div>
+                        </div>
+
+
+                        <!-- <ul class="list-unstyled small mb-3">
+                            <li><i class="bi bi-calendar3 me-1"></i> {{ classes.day_of_week }} at {{
+                                classes.start_time }}</li>
+                            <li><i class="bi bi-clock me-1"></i> {{ classes.duration }} min</li>
+                            <li><i class="bi bi-geo-alt me-1"></i> {{ classes.kitchen }}</li>
+                        </ul>
+
+                        <a href="{{ url_for('session_details', session_id=classes.id) }}"
+                            class="btn btn-outline-success btn-sm w-100">
+                            <i class="bi bi-info-circle me-1"></i> View details
+                        </a> -->
+
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <p class="mb-0">You haven't made any classes yet.</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    {% endblock %}

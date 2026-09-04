@@ -41,9 +41,12 @@ The cake is a lie - {{ session_class.title }}
                         </div>
                         <span class="fw-bold text-dark me-1">{{ "%.1f"|format(rating) }}</span>
                         <span class="text-muted small">({{ total_votes }} votes)</span>
-                    </div>
 
-                    <p class="text-muted">{{ session_class.description }}</p>
+                    </div>
+                    
+                    <p class="small fw-semibold text-muted">Created by {{ name_manager }}</p>
+
+                    <p class="text-secondary">{{ session_class.description }}</p>
                 </div>
             </div>
 
