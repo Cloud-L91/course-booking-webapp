@@ -7,7 +7,7 @@ The cake is a lie - Create class
 {% block content %}
 <section class="form-card">
     <div class="register-box register-class">
-        <form form-signin w-100 m-auto method="POST" action="{{ url_for('create_class') }}"
+        <form class="form-signin w-100 m-auto" method="POST" action="{{ url_for('create_class') }}"
             enctype="multipart/form-data">
 
 
@@ -80,13 +80,13 @@ The cake is a lie - Create class
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form>
-                                <div class="mb-3">
 
-                                    <p class="text-muted small mb-2">Write one ingredient per line (minimum 4):</p>
-                                    <textarea class="form-control" id="ingredients" name="ingredients" rows="8"></textarea>
-                                </div>
-                            </form>
+                            <div class="mb-3">
+
+                                <p class="text-muted small mb-2">Write one ingredient per line (minimum 4):</p>
+                                <textarea class="form-control" id="ingredients" name="ingredients" rows="8"></textarea>
+                            </div>
+
 
                         </div>
                         <div class="modal-footer">

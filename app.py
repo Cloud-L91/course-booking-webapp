@@ -250,6 +250,10 @@ def create_class():
         chef_name = request.form.get("chef_name")
         description = request.form.get("description")
         dietary_category = request.form.get("dietary_category")
+        raw_ingredients = request.form.get("ingredients","")
+
+        ingredients = [ingredient.strip() for ingredient in raw_ingredients.splitlines() if ingredient.strip()]
+
         file_1 = request.files.get("photo_1")
         file_2 = request.files.get("photo_2")
         file_3 = request.files.get("photo_3")
@@ -262,7 +266,7 @@ def create_class():
             if f and f.filename:
                 f.save(f"static/img/classes/{f.filename}")
 
-        cooking_class_dao.add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user.email)
+        cooking_class_dao.add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user.email, ingredients)
 
         return redirect(url_for("manager_profile"))
 

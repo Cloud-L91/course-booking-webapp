@@ -142,7 +142,7 @@ def get_class_rating(cooking_class_id):
         return float(result["average_rating"]), int(result["tot_ratings"])
     return None, 0
 
-def add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user_email):
+def add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user_email, ingredients):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
@@ -150,5 +150,10 @@ def add_cooking_class(title, cuisine, duration, difficulty, chef_name, descripti
         INSERT INTO COOKING_CLASS (title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, USER_email)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user_email))
+
+    class_id = cursor.lastrowid
+
+    for ingredient in ingredients:
+        cursor.execute("INSERT INTO INGREDIENT (name, COOKING_CLASS_id) VALUES (?, ?)", (ingredient, class_id))
 
     utilities_dao.close_connection(conn, cursor)
