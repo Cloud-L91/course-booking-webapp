@@ -15,10 +15,12 @@ The cake is a lie - Home
                 <div class="text-white col-lg-8">
                     <h1 class="display-5 fw-bold mb-3">The cake is a lie</h1>
                     <p class="lead mb-4">
-                        Discover hands-on classes with top chefs, book your workstation in the kitchen, and hone your culinary skills.
+                        Discover hands-on classes with top chefs, book your workstation in the kitchen, and hone your
+                        culinary skills.
                     </p>
                     <div class="d-grid gap-2 d-sm-flex">
-                        <a href="#sessions-list" class="btn btn-primary btn-lg px-4 gap-3 fw-bold">Prepare to Be Baked</a>
+                        <a href="#sessions-list" class="btn btn-primary btn-lg px-4 gap-3 fw-bold">Prepare to Be
+                            Baked</a>
                     </div>
                 </div>
             </div>
@@ -44,7 +46,7 @@ The cake is a lie - Home
                             {{ session.title }}
                         </a>
                     </h5>
-                    
+
                     <ul class="mb-3 list-inline">
                         <li class="list-inline-item">
                             <i class="bi bi-clock me-1"></i>
@@ -55,16 +57,40 @@ The cake is a lie - Home
                             <span class="small">{{ session.difficulty }}</span>
                         </li>
                     </ul>
-
                     <p class="small mb-0">
                         <i class="bi bi-person-badge me-1"></i>
                         <strong>Chef:</strong> {{ session.chef_name }}
                     </p>
+
                 </div>
 
-                <div class="card-footer">
+                <div class="card-footer d-flex justify-content-between mt-0">
                     <small class="text-body-secondary"><strong>Day: </strong>{{ session.day_of_week }} - {{
                         session.start_time }}</small>
+
+                    {% if session.id in passed_sessions %}
+
+                        {% if user_bookings.get(session.id) == 'ENROLLED' %}
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-check-circle me-1"></i> Attended
+                        </span>
+                        {% else %}
+                        <span class="badge bg-secondary text-dark">
+                            <i class="bi bi-clock-history me-1"></i> Ended
+                        </span>
+                        {% endif %}
+
+                    {% else %}
+                        {% if user_bookings.get(session.id) == 'ENROLLED' %}
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i> Booked
+                        </span>
+                        {% elif user_bookings.get(session.id) == 'WAITING' %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-clock-history me-1"></i> In Waiting List
+                        </span>
+                        {% endif %}
+                    {% endif %}
                 </div>
 
             </div>

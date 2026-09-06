@@ -15,7 +15,20 @@ login_manager.login_view = "login"
 @app.route("/")
 def home():
     session_classes = cooking_class_dao.get_all_sessions()
-    return render_template("public/index.html", session_classes=session_classes)
+
+    passed_sessions = []
+    for session in session_classes:
+        if booking_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
+            passed_sessions.append(session["id"])
+
+    user_bookings = {}
+    if current_user.is_authenticated:
+        for session in session_classes:
+            status = booking_dao.check_existing_booking(current_user.email, session["id"])
+            if status:
+                user_bookings[session["id"]] = status
+
+    return render_template("public/index.html", session_classes=session_classes, user_bookings=user_bookings, passed_sessions=passed_sessions)
 
 @app.route("/session_details/<int:session_id>")
 def session_details(session_id):
@@ -44,6 +57,7 @@ def session_details(session_id):
     return render_template(
         "public/session_details.html",
         session_class=session_class,
+        session_id=session_id,
         ingredients=ingredients,
         available_spots=available_spots,
         user_status=user_status,
@@ -140,19 +154,18 @@ def enroll(session_id):
         if current_user.role != "student":
             return redirect(url_for("session_details", session_id=session_id))
 
-        already_enrolled = booking_dao.check_existing_booking(current_user.email, session_id)
-        if already_enrolled:
+        if booking_dao.check_existing_booking(current_user.email, session_id):
             return redirect(url_for("session_details", session_id=session_id))
 
         total_enrollments = booking_dao.count_user_enrollments(current_user.email)
         available_spots = cooking_class_dao.get_available_spots(session_id)
 
-        if available_spots > 0:
-            if total_enrollments >= utilities_dao.MAX_ENROLLMENTS:
-                return redirect(url_for("session_details", session_id=session_id))
-            status = "ENROLLED"
-        else:
+        if available_spots <= 0:
             status = "WAITING"
+        elif total_enrollments >= utilities_dao.MAX_ENROLLMENTS:
+            return redirect(url_for("session_details", session_id=session_id))
+        else:
+            status = "ENROLLED"
 
         booking_dao.enroll_user_in_session(status, session_id, current_user.email)
 
@@ -169,7 +182,11 @@ def delete_booking(session_id):
         day = session_class["day_of_week"]
         time = session_class["start_time"]
 
-        if not booking_dao.check_delete_eligibility(day, time):
+        user_status = booking_dao.check_existing_booking(current_user.email, session_id)
+        if not user_status:
+            return redirect(url_for("session_details", session_id=session_id))
+
+        if user_status == "ENROLLED" and not booking_dao.check_delete_eligibility(day, time):
             return redirect(url_for("session_details", session_id=session_id))
 
         success = booking_dao.delete_booking(current_user.email, session_id, day, time)

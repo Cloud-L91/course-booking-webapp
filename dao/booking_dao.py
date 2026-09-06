@@ -11,10 +11,7 @@ def check_existing_booking(user_email, session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT * FROM BOOKING WHERE USER_email = ? AND CLASS_SESSION_id = ?",
-        (user_email, session_id)
-    )
+    cursor.execute("SELECT * FROM BOOKING WHERE USER_email = ? AND CLASS_SESSION_id = ?", (user_email, session_id))
     booking = cursor.fetchone()
 
     utilities_dao.close_connection(conn, cursor)
@@ -25,18 +22,14 @@ def check_existing_booking(user_email, session_id):
     return None
 
 def count_user_enrollments(user_email):
-    conn = utilities_dao.db_connect()
-    cursor = conn.cursor()
+    all_sessions = get_user_enrolled_sessions(user_email)
 
-    cursor.execute(
-        "SELECT COUNT(*) FROM BOOKING WHERE USER_email = ? AND status = 'ENROLLED'",
-        (user_email,)
-    )
-    enrollment_count = cursor.fetchone()[0]
+    active_enrollments = 0
+    for session in all_sessions:
+        if not check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
+            active_enrollments += 1
 
-    utilities_dao.close_connection(conn, cursor)
-
-    return enrollment_count
+    return active_enrollments
 
 def check_delete_eligibility(day, time):
     session_time = utilities_dao.get_week_time(day, time)
@@ -51,9 +44,6 @@ def check_end_of_session(day, time, duration):
     return current_time >= session_end_time
 
 def delete_booking(user_email, session_id, day, time):
-    if day == utilities_dao.CURRENT_DAY and time < utilities_dao.CURRENT_TIME:
-        return False
-
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
@@ -138,4 +128,10 @@ def set_user_rating(user_email, session_id, rating):
     utilities_dao.close_connection(conn, cursor)
 
     return success
-    
+
+def insert_in_waiting_list(status,user_email, session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("INSERT INTO BOOKING (status, CLASS_SESSION_id, USER_email) VALUES (?, ?, ?)", (status, session_id, user_email))
+    utilities_dao.close_connection(conn, cursor)

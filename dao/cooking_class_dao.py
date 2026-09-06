@@ -49,10 +49,10 @@ def get_all_sessions():
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT * 
-    FROM CLASS_SESSION 
-    JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
-    """)
+        SELECT * 
+        FROM CLASS_SESSION 
+        JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
+        """)
     sessions = cursor.fetchall()
     sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
 
@@ -64,11 +64,11 @@ def get_single_session(session_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT *
-    FROM CLASS_SESSION
-    JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
-    WHERE CLASS_SESSION.id = ?
-    """, (session_id,))
+        SELECT *
+        FROM CLASS_SESSION
+        JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
+        WHERE CLASS_SESSION.id = ?
+        """, (session_id,))
 
     session = cursor.fetchone()
 
@@ -108,13 +108,13 @@ def get_available_spots(session_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT max_capacity - (
-        SELECT COUNT(*) 
-        FROM BOOKING 
-        WHERE CLASS_SESSION_id = CLASS_SESSION.id AND status = 'ENROLLED') AS available_spots
-    FROM CLASS_SESSION
-    WHERE CLASS_SESSION.id = ?
-    """, (session_id,))
+        SELECT max_capacity - (
+            SELECT COUNT(*) 
+            FROM BOOKING 
+            WHERE CLASS_SESSION_id = CLASS_SESSION.id AND status = 'ENROLLED') AS available_spots
+        FROM CLASS_SESSION
+        WHERE CLASS_SESSION.id = ?
+        """, (session_id,))
 
     result = cursor.fetchone()
     utilities_dao.close_connection(conn, cursor)
