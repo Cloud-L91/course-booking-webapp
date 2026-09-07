@@ -261,8 +261,9 @@ def manager_profile():
     all_classes = cooking_class_dao.get_all_classes_per_manager(current_user.email)
     session_classes = cooking_class_dao.get_sessions_per_manager(current_user.email)
     all_ingredients = cooking_class_dao.get_all_ingredients()
+    stats = user_dao.get_manager_stats(current_user.email)
    
-    return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, all_ingredients=all_ingredients)
+    return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, all_ingredients=all_ingredients, stats=stats)
 
 @app.route("/create_class", methods=["GET", "POST"])
 @login_required
