@@ -215,16 +215,22 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                         {% for session in session_classes %}
                                         {% if session.COOKING_CLASS_id == classes.id %}
                                         <tr class="align-middle session-row">
-                                            <td class="fw-semibold text-dark">{{ session.day_of_week }} at {{ session.start_time }}
+                                            <td class="fw-semibold text-dark">{{ session.day_of_week }} at {{
+                                                session.start_time }}
                                             </td>
                                             <td>{{ session.kitchen }}</td>
                                             <td>{{ session.enrolled_count }}/{{ session.max_capacity }}</td>
                                             <td>RATING</td>
-                                            <td>
+                                            <td class="text-center">
+                                                {% if session.enrolled_count > 0 %}
+                                                Not deletable
+                                                {% else %}
                                                 <form action="{{ url_for('delete_session', session_id=session.id) }}"
-                                                    method="POST" class="text-center">
-                                                    <button type="submit" class="btn-close text-danger" aria-label="Close"></button>
+                                                    method="POST">
+                                                    <button type="submit" class="btn btn-close btn-outline-danger"
+                                                        aria-label="Close"></button>
                                                 </form>
+                                                {% endif %}
                                             </td>
                                         </tr>
                                         {% endif %}

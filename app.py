@@ -43,6 +43,8 @@ def session_details(session_id):
     duration = session_class["duration"]
     deletable = utilities_dao.check_delete_eligibility(day, time)
     passed_session = utilities_dao.check_end_of_session(day, time, duration)
+    session_started = utilities_dao.check_end_of_session(day, time, 0)
+    session_in_progress = session_started and not passed_session
 
     user_status = None
     max_bookings_reached = False
@@ -70,6 +72,7 @@ def session_details(session_id):
         rating=rating,
         total_votes=total_votes,
         deletable=deletable,
+        session_in_progress=session_in_progress,
         has_conflict=has_conflict,
         name_manager=name_manager
         )
@@ -160,6 +163,12 @@ def enroll(session_id):
             return redirect(url_for("session_details", session_id=session_id))
 
         if booking_dao.check_existing_booking(current_user.email, session_id):
+            return redirect(url_for("session_details", session_id=session_id))
+
+        session_class = cooking_class_dao.get_single_session(session_id)
+        day = session_class["day_of_week"]
+        time = session_class["start_time"]
+        if utilities_dao.check_end_of_session(day, time, 0):
             return redirect(url_for("session_details", session_id=session_id))
 
         total_enrollments = booking_dao.count_user_enrollments(current_user.email)
