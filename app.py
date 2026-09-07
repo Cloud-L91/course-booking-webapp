@@ -230,18 +230,26 @@ def student_profile():
 
     upcoming_sessions = []
     past_sessions = []
+    on_waiting_list = []
 
     for session in all_sessions:
         day = session["day_of_week"]
         time = session["start_time"]
         duration = session["duration"]
+        ended = booking_dao.check_end_of_session(day, time, duration)
 
-        if booking_dao.check_end_of_session(day, time, duration):
-            past_sessions.append(session)
+        if session["status"] == "WAITING":
+            if not ended:
+                session = dict(session)
+                session["waiting_position"] = booking_dao.get_waiting_list_positions(current_user.email, session["id"])   
+                on_waiting_list.append(session)
         else:
-            upcoming_sessions.append(session)
+            if ended:
+                past_sessions.append(session)
+            else:
+                upcoming_sessions.append(session)
 
-    return render_template("student/student_profile.html", upcoming_sessions=upcoming_sessions, past_sessions=past_sessions)
+    return render_template("student/student_profile.html", upcoming_sessions=upcoming_sessions, past_sessions=past_sessions, on_waiting_list=on_waiting_list)
 
 @app.route("/manager_profile")
 @login_required

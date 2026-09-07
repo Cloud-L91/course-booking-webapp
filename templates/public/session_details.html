@@ -95,11 +95,10 @@ The cake is a lie - {{ session_class.title }}
                 <div class="card p-4 rounded-3">
                     <h5 class="fw-bold mb-3">Join this session</h5>
 
-                    <p class="text-muted small mb-1">Available spots</p>
+                    <p class="text-muted small mb-1">Enrolled students</p>
 
                     <div class="h3 fw-bold text-success mb-2">
-                        {{ available_spots }} <span class="text-muted fs-5 fw-normal"> / {{ session_class.max_capacity
-                            }}</span>
+                        {{ session_class.max_capacity - available_spots }} <span class="text-muted fs-5 fw-normal"> / {{ session_class.max_capacity }}</span>
                     </div>
 
                     <!-- UTENTE ANONIMO -->

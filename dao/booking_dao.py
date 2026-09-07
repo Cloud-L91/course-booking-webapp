@@ -26,7 +26,7 @@ def count_user_enrollments(user_email):
 
     active_enrollments = 0
     for session in all_sessions:
-        if not check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
+        if session["status"] == "ENROLLED" and not check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
             active_enrollments += 1
 
     return active_enrollments
@@ -47,10 +47,42 @@ def delete_booking(user_email, session_id, day, time):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
+    cursor.execute("SELECT status FROM BOOKING WHERE USER_email = ? AND CLASS_SESSION_id = ?",(user_email, session_id))
+    booking = cursor.fetchone()
+    was_enrolled = booking and booking["status"] == "ENROLLED"
+
     cursor.execute("DELETE FROM BOOKING WHERE USER_email = ? AND CLASS_SESSION_id = ?", (user_email, session_id))
 
     utilities_dao.close_connection(conn, cursor)
+
+    if was_enrolled:
+        promote_waiting_list(session_id)
+
     return True
+
+def promote_waiting_list(session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT id, USER_email
+        FROM BOOKING 
+        WHERE CLASS_SESSION_id = ? AND status = 'WAITING' 
+        ORDER BY id ASC
+        """,
+        (session_id,)
+    )
+
+    waiting_users = cursor.fetchall()
+
+    promoted = False
+    for user in waiting_users:
+        if not promoted and count_user_enrollments(user["USER_email"]) < utilities_dao.MAX_ENROLLMENTS:
+            cursor.execute("UPDATE BOOKING SET status = 'ENROLLED' WHERE id = ?",(user["id"],))
+            promoted = True
+
+    utilities_dao.close_connection(conn, cursor)
 
 def get_user_bookings(user_email):
     conn = utilities_dao.db_connect()
@@ -80,12 +112,13 @@ def get_user_enrolled_sessions(user_email):
             CLASS_SESSION.day_of_week,
             CLASS_SESSION.start_time,
             CLASS_SESSION.kitchen,
+            BOOKING.status,
             BOOKING.rating
         FROM BOOKING, CLASS_SESSION, COOKING_CLASS
         WHERE BOOKING.CLASS_SESSION_id = CLASS_SESSION.id
           AND CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
           AND BOOKING.USER_email = ?
-          AND BOOKING.status = 'ENROLLED'
+          AND BOOKING.status IN ('ENROLLED', 'WAITING')
     """
     cursor.execute(query, (user_email,))
     booked_sessions = cursor.fetchall()
@@ -135,3 +168,25 @@ def insert_in_waiting_list(status,user_email, session_id):
 
     cursor.execute("INSERT INTO BOOKING (status, CLASS_SESSION_id, USER_email) VALUES (?, ?, ?)", (status, session_id, user_email))
     utilities_dao.close_connection(conn, cursor)
+
+def get_waiting_list_positions(user_email, session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT COUNT(*) AS position
+        FROM BOOKING
+        WHERE CLASS_SESSION_id = ?
+            AND status = 'WAITING'
+            AND id <= (
+                SELECT id
+                FROM BOOKING
+                WHERE CLASS_SESSION_id = ?
+                    AND USER_email = ?
+            )
+    """
+    cursor.execute(query, (session_id, session_id, user_email))
+    waiting_list = cursor.fetchone()
+
+    utilities_dao.close_connection(conn, cursor)
+    return waiting_list["position"] if waiting_list else None
