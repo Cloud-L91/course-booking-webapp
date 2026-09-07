@@ -302,13 +302,38 @@ def create_class():
 
     return render_template("/manager/create_class.html")
 
-@app.route("/create_session", methods=["GET", "POST"])
+@app.route("/add_session", methods=["GET", "POST"])
 @login_required
-def create_session():
+def add_session():
     if current_user.role != "manager":
         return redirect(url_for("home"))
 
-    return render_template("/manager/create_session.html")
+    if request.method == "POST":
+        cooking_class_id = request.form.get("cooking_class_id")
+        day_of_week = request.form.get("day_of_week")
+        start_time = request.form.get("start_time")
+        kitchen = request.form.get("kitchen")
+        max_capacity = request.form.get("max_capacity")
+
+        cooking_class_dao.add_session(cooking_class_id, day_of_week, start_time, kitchen, max_capacity)
+
+    return redirect(url_for("manager_profile"))
+
+@app.route("/delete_session/<int:session_id>", methods=["POST"])
+@login_required
+def delete_session(session_id):
+    if current_user.role != "manager":
+        return redirect(url_for("home"))
+
+    if request.method == "POST":
+        # check if there are people enrolled in the session
+        enrolled_count = booking_dao.check_session_enrollment(session_id)
+        if enrolled_count > 0:
+            return redirect(url_for("manager_profile"))
+        else:
+            cooking_class_dao.delete_session(session_id)
+
+    return redirect(url_for("manager_profile"))
 
 if __name__ == "__main__":
     app.run(debug=True)

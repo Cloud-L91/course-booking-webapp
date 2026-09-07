@@ -11,17 +11,15 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
             <h3 class="fw-bold mb-1">Oh... It's you, {{ current_user.first_name }}.</h3>
             <p class="text-muted mb-0">Here is your statistics. Observe how many potential poisoners there are.</p>
         </div>
-
         <a href="{{ url_for('create_class') }}" class="btn btn-primary btn-lg">
-            Create New Class
+            + New Class
         </a>
     </div>
 
     <div class="row">
-
         <div class="col-12 col-md-6">
             <div class="row g-3">
-                <!-- Total Classes -->
+                <!-- TOTAL CLASSES -->
                 <div class="col-6">
                     <div class="card border-dark text-center">
                         <div class="card-body p-3 d-flex flex-column justify-content-center">
@@ -31,7 +29,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                     </div>
                 </div>
 
-                <!-- Total Sessions -->
+                <!-- TOTAL SESSIONS -->
                 <div class="col-6">
                     <div class="card border-dark text-center">
                         <div class="card-body p-3 d-flex flex-column justify-content-center">
@@ -41,7 +39,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                     </div>
                 </div>
 
-                <!-- Total Enrollments -->
+                <!-- TOTAL ENROLLMENTS -->
                 <div class="col-6">
                     <div class="card border-dark text-center">
                         <div class="card-body p-3 d-flex flex-column justify-content-center">
@@ -51,7 +49,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                     </div>
                 </div>
 
-                <!-- On Waiting List -->
+                <!-- WAITING LIST -->
                 <div class="col-6">
                     <div class="card border-dark text-center">
                         <div class="card-body p-3 d-flex flex-column justify-content-center">
@@ -63,21 +61,36 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
             </div>
         </div>
 
-        <!-- DESTRA: Cuisine (compatta in alto) + Rating (ampia in basso) (col-md-4) -->
+        <!-- DESTRA: CUISINE (ALTA) + RATING (BASSA) -->
         <div class="col-12 col-md-6 d-flex flex-column gap-3">
-            <!-- Popular Cuisine (sottile/compatta) -->
             <div class="card border-dark">
                 <div class="card-body p-3 d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="small fw-bold text-muted mb-0">POPULAR CUISINE</h6>
                     </div>
                     <div class="fs-4 fw-bold text-primary text-end">
-                        {{ stats.most_popular_cuisine }}
+
+                        {% if stats.most_popular_cuisines|length > 1 %}
+                        <div id="cuisineCarousel" class="carousel slide" data-bs-ride="carousel" data-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for cuisine in stats.most_popular_cuisines %}
+                                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                    <span>{{ cuisine }}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% elif stats.most_popular_cuisines|length == 1 %}
+                        {{ stats.most_popular_cuisines[0] }}
+                        {% else %}
+                        N/A
+                        {% endif %}
+
                     </div>
                 </div>
             </div>
 
-            <!-- Highest Rating (più grande per contenere titolo, voto e pareggi) -->
+            <!-- HIGHEST RATING -->
             <div class="card border-dark flex-grow-1">
                 <div class="card-body p-3 d-flex flex-column justify-content-between">
                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -88,7 +101,29 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                     </div>
                     <div class="my-auto">
                         <div class="fw-bold text-dark fs-5 mb-1" style="line-height: 1.25;">
-                            {{ stats.highest_rated_class }}
+
+                            {% if stats.highest_rated_classes|length > 1 %}
+                            <div id="ratingCarousel" class="carousel slide" data-bs-ride="carousel"
+                                data-ride="carousel">
+                                <div class="carousel-inner">
+                                    {% for title in stats.highest_rated_classes %}
+                                    <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                        <div class="fw-bold text-dark fs-5 mb-1 text-truncate"
+                                            style="line-height: 1.25;" title="{{ title }}">
+                                            {{ title }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% elif stats.highest_rated_classes|length == 1 %}
+                            <div class="fw-bold text-dark fs-5 mb-1" style="line-height: 1.25;">
+                                {{ stats.highest_rated_classes[0] }}
+                            </div>
+                            {% else %}
+                            <div class="fw-bold text-muted fs-5 mb-1">None</div>
+                            {% endif %}
+
                         </div>
                     </div>
                 </div>
@@ -96,8 +131,8 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
         </div>
     </div>
 
+    <!-- ACCORDION PER GLI ELENCHI DELLE SESSIONI -->
     <div class="border border-dark rounded-3 p-3 my-4">
-
         {% if all_classes %}
         <div class="accordion" id="classesAccordion">
             {% for classes in all_classes %}
@@ -121,14 +156,14 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                 <h6><span class="badge badge-classes-mng">{{ classes.difficulty }}</span></h6>
                                 <h6><span class="badge badge-classes-mng">{{ classes.dietary_category }}</span></h6>
                             </div>
-
                         </div>
                     </button>
                 </h2>
+
+                <!-- APERTURA SINGOLA CLASSE -->
                 <div id="collapse-{{ classes.id }}" class="accordion-collapse collapse"
                     data-bs-parent="#classesAccordion">
                     <div class="accordion-body">
-
                         <div class="row g-0">
                             <div class="col-md-4 text-start border-end">
                                 <strong>PROMOTIONAL PHOTOS</strong>
@@ -155,10 +190,16 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                     {% endif %}
                                     {% endfor %}
                                 </div>
-
                             </div>
+
                             <div class="col-md-4 text-start border-end">
-                                <strong class="d-block mb-1">SCHEDULED SESSIONS</strong>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="mb-0">SCHEDULED SESSIONS</strong>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                        data-bs-target="#addSessionModal-{{ classes.id }}">
+                                        + Add Session
+                                    </button>
+                                </div>
 
                                 <table class="table table-sm table-hover align-middle border small mb-0 p-2">
                                     <thead class="table-light">
@@ -167,42 +208,32 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                             <th>Kitchen</th>
                                             <th>Enrolled</th>
                                             <th>Rating</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for s in session_classes %}
-                                        {% if s.COOKING_CLASS_id == classes.id %}
-                                        <tr class="align-middle mt-2">
-                                            <td class="fw-semibold text-dark">{{ s.day_of_week }} at {{ s.start_time }}
+                                        {% for session in session_classes %}
+                                        {% if session.COOKING_CLASS_id == classes.id %}
+                                        <tr class="align-middle session-row">
+                                            <td class="fw-semibold text-dark">{{ session.day_of_week }} at {{ session.start_time }}
                                             </td>
-                                            <td>{{ s.kitchen }}</td>
-                                            <td>{{ s.enrolled_count }}/{{ s.max_capacity }}</td>
+                                            <td>{{ session.kitchen }}</td>
+                                            <td>{{ session.enrolled_count }}/{{ session.max_capacity }}</td>
                                             <td>RATING</td>
+                                            <td>
+                                                <form action="{{ url_for('delete_session', session_id=session.id) }}"
+                                                    method="POST" class="text-center">
+                                                    <button type="submit" class="btn-close text-danger" aria-label="Close"></button>
+                                                </form>
+                                            </td>
                                         </tr>
                                         {% endif %}
                                         {% endfor %}
                                     </tbody>
                                 </table>
-
-
-
                             </div>
                             <div class="col-md-4 text-center">.col-md-4</div>
                         </div>
-
-
-                        <!-- <ul class="list-unstyled small mb-3">
-                            <li><i class="bi bi-calendar3 me-1"></i> {{ classes.day_of_week }} at {{
-                                classes.start_time }}</li>
-                            <li><i class="bi bi-clock me-1"></i> {{ classes.duration }} min</li>
-                            <li><i class="bi bi-geo-alt me-1"></i> {{ classes.kitchen }}</li>
-                        </ul>
-
-                        <a href="{{ url_for('session_details', session_id=classes.id) }}"
-                            class="btn btn-outline-success btn-sm w-100">
-                            <i class="bi bi-info-circle me-1"></i> View details
-                        </a> -->
-
 
                     </div>
                 </div>
@@ -214,7 +245,66 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
             <p class="mb-0">You haven't made any classes yet.</p>
         </div>
         {% endif %}
-
     </div>
 
-    {% endblock %}
+    <!-- MODAL PER SESSIONE -->
+    {% for classes in all_classes %}
+    <div class="modal fade" id="addSessionModal-{{ classes.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-dark">
+
+                <div class="modal-header py-2">
+                    <h6 class="modal-title fw-bold">New Session: {{ classes.title }}</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form action="{{ url_for('add_session') }}" method="POST">
+                    <div class="modal-body py-3">
+                        <input type="hidden" name="cooking_class_id" value="{{ classes.id }}">
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold mb-1">Day</label>
+                                <select name="day_of_week" class="form-select form-select-sm border-dark" required>
+                                    <option value="" selected disabled>Choose...</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold mb-1">Time</label>
+                                <input type="time" name="start_time" class="form-control form-control-sm border-dark"
+                                    required>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold mb-1">Kitchen</label>
+                                <input type="text" name="kitchen" class="form-control form-control-sm border-dark"
+                                    required>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold mb-1">Capacity</label>
+                                <input type="number" name="max_capacity"
+                                    class="form-control form-control-sm border-dark" min="1" max="10" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

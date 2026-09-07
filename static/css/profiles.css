@@ -7,3 +7,7 @@
 .badge-classes-mng {
     background-color:rgb(5, 131, 87);
 }
+
+.session-row td {
+    height: 48px;
+}

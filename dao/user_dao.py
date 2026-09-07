@@ -35,17 +35,17 @@ def get_manager_stats(email):
         "total_sessions": 0,
         "total_enrollments": 0,
         "total_waiting_students": 0,
-        "most_popular_cuisine": None,
-        "highest_rated_class": None,
+        "most_popular_cuisines": [],
+        "highest_rated_classes": [],
         "highest_avg_rating": 0.0
     }
 
-    #1. Tot number of cooking classes created by the manager
+    #1. TOTAL number of COOKING CLASSES created by the manager
     query = "SELECT COUNT(*) AS total_classes FROM COOKING_CLASS WHERE USER_email = ?"
     cursor.execute(query, (email,))
     stats["total_classes"] = cursor.fetchone()["total_classes"]
 
-    #2. Total number of sessions created by the manager
+    #2. TOTAL number of SESSIONS created by the manager
     query = """SELECT COUNT(*) AS total_sessions
         FROM CLASS_SESSION, COOKING_CLASS
         WHERE CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
@@ -54,7 +54,7 @@ def get_manager_stats(email):
     cursor.execute(query, (email,))
     stats["total_sessions"] = cursor.fetchone()["total_sessions"]
 
-    #3. Total enrollments in all sessions created by the manager
+    #3. TOTAL ENROLLMENTS in all sessions created by the manager
     query = """
         SELECT COUNT(*) AS total_enrollments
         FROM BOOKING, CLASS_SESSION, COOKING_CLASS
@@ -66,7 +66,7 @@ def get_manager_stats(email):
     cursor.execute(query, (email,))
     stats["total_enrollments"] = cursor.fetchone()["total_enrollments"]
 
-    #4. Total number of students on the waiting list for all sessions created by the manager
+    #4. Total number of students on the WAITING LIST for all sessions created by the manager
     query = """
         SELECT COUNT(DISTINCT BOOKING.user_email) AS total_waiting_students
         FROM BOOKING, CLASS_SESSION, COOKING_CLASS
@@ -78,7 +78,7 @@ def get_manager_stats(email):
     cursor.execute(query, (email,))
     stats["total_waiting_students"] = cursor.fetchone()["total_waiting_students"]
 
-    #5. Most popular cuisine per enrolled students
+    #5. Most POPULAR CUISINE per enrolled students
     query = """
         SELECT COOKING_CLASS.cuisine, COUNT(*) AS enrolled_count
         FROM BOOKING, CLASS_SESSION, COOKING_CLASS
@@ -90,11 +90,18 @@ def get_manager_stats(email):
         ORDER BY enrolled_count DESC
         """
     cursor.execute(query, (email,))
-    row = cursor.fetchone()
-    if row:
-        stats["most_popular_cuisine"] = row["cuisine"]
+    rows = cursor.fetchall()
 
-    #6. Class with the highest average rating
+    top_cuisines = []
+    if rows:
+        max_enrolled_count = rows[0]["enrolled_count"]
+        for row in rows:
+            if row["enrolled_count"] == max_enrolled_count:
+                top_cuisines.append(row["cuisine"])
+
+    stats["most_popular_cuisines"] = top_cuisines
+
+    #6. Class with the HIGHEST AVERAGE RATING
     query = """
         SELECT COOKING_CLASS.title, AVG(BOOKING.rating) AS avg_rate
         FROM BOOKING, CLASS_SESSION, COOKING_CLASS
@@ -106,10 +113,16 @@ def get_manager_stats(email):
         ORDER BY avg_rate DESC
         """
     cursor.execute(query, (email,))
-    row = cursor.fetchone()
-    if row and row["avg_rate"] is not None:
-        stats["highest_rated_class"] = row["title"]
-        stats["highest_avg_rating"] = round(float(row["avg_rate"]), 1)
+    rows = cursor.fetchall()
+
+    top_classes = []
+    if rows and rows[0]["avg_rate"] is not None:
+        stats["highest_avg_rating"] = round(float(rows[0]["avg_rate"]), 1)
+        for row in rows:
+            if round(float(row["avg_rate"]), 1) == stats["highest_avg_rating"]:
+                top_classes.append(row["title"])
+
+    stats["highest_rated_classes"] = top_classes
 
     utilities_dao.close_connection(conn, cursor)
 

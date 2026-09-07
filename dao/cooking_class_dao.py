@@ -157,3 +157,20 @@ def add_cooking_class(title, cuisine, duration, difficulty, chef_name, descripti
         cursor.execute("INSERT INTO INGREDIENT (name, COOKING_CLASS_id) VALUES (?, ?)", (ingredient, class_id))
 
     utilities_dao.close_connection(conn, cursor)
+
+def add_session(cooking_class_id, day_of_week, start_time, kitchen, max_capacity):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query ="INSERT INTO CLASS_SESSION (COOKING_CLASS_id, day_of_week, start_time, kitchen, max_capacity) VALUES (?, ?, ?, ?, ?)"
+    cursor.execute(query, (cooking_class_id, day_of_week, start_time, kitchen, max_capacity))
+
+    utilities_dao.close_connection(conn, cursor)
+
+def delete_session(session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM CLASS_SESSION WHERE id = ?", (session_id,))
+
+    utilities_dao.close_connection(conn, cursor)

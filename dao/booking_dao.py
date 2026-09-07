@@ -21,6 +21,17 @@ def check_existing_booking(user_email, session_id):
 
     return None
 
+def check_session_enrollment(session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) AS enrolled_count FROM BOOKING WHERE CLASS_SESSION_id = ? AND status = 'ENROLLED'", (session_id,))
+    enrolled_count = cursor.fetchone()["enrolled_count"]
+
+    utilities_dao.close_connection(conn, cursor)
+
+    return enrolled_count
+
 def check_time_conflict(user_email, session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
