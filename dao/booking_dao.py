@@ -21,29 +21,42 @@ def check_existing_booking(user_email, session_id):
 
     return None
 
+def check_time_conflict(user_email, session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT day_of_week, start_time, duration
+        FROM CLASS_SESSION, COOKING_CLASS
+        WHERE CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
+            AND CLASS_SESSION.id = ?
+    """
+    cursor.execute(query, (session_id,))
+    new_session = cursor.fetchone()
+    utilities_dao.close_connection(conn, cursor)
+
+    if not new_session:
+        return False
+
+    for session in get_user_enrolled_sessions(user_email):
+        if session["status"] == "ENROLLED":
+            if utilities_dao.check_intervals_overlap(new_session["day_of_week"], new_session["start_time"], new_session["duration"],
+                                                     session["day_of_week"], session["start_time"], session["duration"]):
+                return True
+
+    return False
+
 def count_user_enrollments(user_email):
     all_sessions = get_user_enrolled_sessions(user_email)
 
     active_enrollments = 0
     for session in all_sessions:
-        if session["status"] == "ENROLLED" and not check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
+        if session["status"] == "ENROLLED" and not utilities_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
             active_enrollments += 1
 
     return active_enrollments
 
-def check_delete_eligibility(day, time):
-    session_time = utilities_dao.get_week_time(day, time)
-    current_time = utilities_dao.get_week_time(utilities_dao.CURRENT_DAY, utilities_dao.CURRENT_TIME)
-    return session_time - current_time >= utilities_dao.MIN_TIME_BEFORE_SESSION
-
-def check_end_of_session(day, time, duration):
-    session_start_time = utilities_dao.get_week_time(day, time)
-    session_duration = utilities_dao.get_minutes(duration)
-    session_end_time = session_start_time + session_duration
-    current_time = utilities_dao.get_week_time(utilities_dao.CURRENT_DAY, utilities_dao.CURRENT_TIME)
-    return current_time >= session_end_time
-
-def delete_booking(user_email, session_id, day, time):
+def delete_booking(user_email, session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 

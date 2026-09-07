@@ -149,9 +149,7 @@ The cake is a lie - {{ session_class.title }}
                             </form>
 
                             {% else %}
-                            <form>
-                                <button type="submit" class="btn btn-outline-secondary btn-sm disabled">Cancel booking</button>
-                            </form>
+                                <button class="btn btn-outline-secondary btn-sm disabled">Cancel booking (less than 12h)</button>
                             {% endif %}
 
                         <!-- STATUS WAITING -->
@@ -179,11 +177,18 @@ The cake is a lie - {{ session_class.title }}
                                         You have already booked the maximum allowed of 4 active sessions.
                                     </p>
                                 {% else%}
-                                    <form method="POST" action="{{ url_for('enroll', session_id=session_id) }}">
-                                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold mb-3">
-                                            Sign up for the session
-                                        </button>
-                                    </form>
+
+
+                                    {% if has_conflict %}
+                                        <div class="alert alert-warning py-2 mb-2">
+                                            <i class="bi bi-exclamation-triangle"></i> You already have another lesson confirmed at this time.
+                                        </div>
+                                        <button class="btn btn-secondary w-100" disabled>Schedule not available</button>
+                                    {% else %}
+                                        <form action="{{ url_for('enroll', session_id=session_id) }}" method="POST">
+                                            <button type="submit" class="btn btn-primary w-100">Sign up for the session</button>
+                                        </form>
+                                    {% endif %}
                                 {% endif %}
 
                             {% else %}

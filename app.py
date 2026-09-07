@@ -18,7 +18,7 @@ def home():
 
     passed_sessions = []
     for session in session_classes:
-        if booking_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
+        if utilities_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
             passed_sessions.append(session["id"])
 
     user_bookings = {}
@@ -41,8 +41,8 @@ def session_details(session_id):
     day = session_class["day_of_week"]
     time = session_class["start_time"]
     duration = session_class["duration"]
-    deletable = booking_dao.check_delete_eligibility(day, time)
-    passed_session = booking_dao.check_end_of_session(day, time, duration)
+    deletable = utilities_dao.check_delete_eligibility(day, time)
+    passed_session = utilities_dao.check_end_of_session(day, time, duration)
 
     user_status = None
     max_bookings_reached = False
@@ -53,6 +53,10 @@ def session_details(session_id):
         max_bookings_reached = (total_enrollments >= utilities_dao.MAX_ENROLLMENTS)
 
     rating, total_votes = cooking_class_dao.get_class_rating(session_class["COOKING_CLASS_id"])
+
+    has_conflict = False
+    if current_user.is_authenticated and current_user.role == "student":
+        has_conflict = booking_dao.check_time_conflict(current_user.email, session_id)
 
     return render_template(
         "public/session_details.html",
@@ -66,6 +70,7 @@ def session_details(session_id):
         rating=rating,
         total_votes=total_votes,
         deletable=deletable,
+        has_conflict=has_conflict,
         name_manager=name_manager
         )
 
@@ -167,6 +172,9 @@ def enroll(session_id):
         else:
             status = "ENROLLED"
 
+        if status == "ENROLLED" and booking_dao.check_time_conflict(current_user.email, session_id):
+            return redirect(url_for("session_details", session_id=session_id))
+
         booking_dao.enroll_user_in_session(status, session_id, current_user.email)
 
     return redirect(url_for("session_details", session_id=session_id))
@@ -186,14 +194,10 @@ def delete_booking(session_id):
         if not user_status:
             return redirect(url_for("session_details", session_id=session_id))
 
-        if user_status == "ENROLLED" and not booking_dao.check_delete_eligibility(day, time):
+        if user_status == "ENROLLED" and not utilities_dao.check_delete_eligibility(day, time):
             return redirect(url_for("session_details", session_id=session_id))
 
-        success = booking_dao.delete_booking(current_user.email, session_id, day, time)
-
-        if success:
-            # TODO: LOGICA DI SCORRIMENTO DELLA LISTA DI ATTESA
-            pass
+        booking_dao.delete_booking(current_user.email, session_id)
     
     return redirect(url_for("session_details", session_id=session_id))
 
@@ -236,7 +240,7 @@ def student_profile():
         day = session["day_of_week"]
         time = session["start_time"]
         duration = session["duration"]
-        ended = booking_dao.check_end_of_session(day, time, duration)
+        ended = utilities_dao.check_end_of_session(day, time, duration)
 
         if session["status"] == "WAITING":
             if not ended:
