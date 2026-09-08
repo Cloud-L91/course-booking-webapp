@@ -353,5 +353,19 @@ def delete_session(session_id):
 
     return redirect(url_for("manager_profile"))
 
+@app.route('/session/edit/<int:session_id>', methods=['POST'])
+@login_required
+def edit_session(session_id):
+    # Recupera i dati del form
+    day = request.form.get('day_of_week')
+    time = request.form.get('start_time')
+    kitchen = request.form.get('kitchen')
+    capacity = request.form.get('max_capacity')
+
+    # Esegui l'UPDATE sul database (assicurati nel DB o nella query che enrolled_count == 0)
+    # db.execute("UPDATE sessions SET day_of_week=?, start_time=?, kitchen=?, max_capacity=? WHERE id=?", (day, time, kitchen, capacity, session_id))
+    
+    return redirect(url_for('manager_profile'))
+
 if __name__ == "__main__":
     app.run(debug=True)

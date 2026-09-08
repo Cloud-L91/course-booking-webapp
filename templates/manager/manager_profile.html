@@ -226,55 +226,62 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                     </button>
                                 </div>
 
-                                <table class="table table-sm table-hover align-middle border small mb-0 p-2">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th class="small">DAY/TIME</th>
-                                            <th class="small">KITCHEN</th>
-                                            <th class="small">AVAILABLE SPOTS</th>
-                                            <th class="small">ACTION</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="nav">
-                                        {% for session in session_classes %}
-                                        {% if session.COOKING_CLASS_id == classes.id %}
-                                        <tr class="align-middle session-row" data-bs-toggle="tab"
-                                            data-bs-target="#session-pane-{{ session.id }}" role="tab">
-                                            <td class="fw-semibold text-dark">{{ session.day_of_week }} at {{
-                                                session.start_time }}</td>
-                                            <td>{{ session.kitchen }}</td>
-                                            <td>{{ session.enrolled_count }}/{{ session.max_capacity }}</td>
-                                            <td class="text-center">
-                                                {% if session.enrolled_count > 0 %}
-                                                <span class="text-muted">Booked</span>
-                                                {% else %}
-                                                <form action="{{ url_for('delete_session', session_id=session.id) }}"
-                                                    method="POST">
-                                                    <button type="submit" class="btn btn-close btn-outline-danger"
-                                                        aria-label="Close"></button>
-                                                </form>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                <div class="d-flex flex-column gap-1" role="tablist">
+                                    {% for session in session_classes %}
+                                    {% if session.COOKING_CLASS_id == classes.id %}
+
+                                    <!-- RETTANGOLO SESSIONE -->
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="border border-dark rounded-3 py-1 px-2 d-flex align-items-center justify-content-between session-row w-75"
+                                            data-bs-toggle="tab"
+                                            data-bs-target="#session-pane-{{ classes.id}}-{{ session.id }}"
+                                            role="tab">
+
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span>📅</span>
+                                                <div>
+                                                    <div class="fw-bold text-dark lh-1 small">{{ session.day_of_week }} • {{ session.start_time }}</div>
+                                                    <small class="text-muted">{{ session.kitchen }}</small>
+                                                </div>
+                                            </div>
+
+                                            <span class="badge bg-secondary-subtle text-dark rounded-pill px-2">
+                                                {{ session.enrolled_count }}/{{ session.max_capacity }}
+                                            </span>
+                                        </div>
+
+                                        <!-- BOTTONE / AVVISO-->
+                                        <div class="flex-grow-1 text-center">
+                                            {% if session.enrolled_count == 0 %}
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-secondary w-100"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editSessionModal-{{ session.id }}">
+                                                Edit
+                                            </button>
+                                            {% else %}
+                                            <span class="text-muted small">Cannot edit</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
                             </div>
 
                             <!-- COLONNA 7: DETTAGLIO STUDENTI (Pannelli collegati) -->
                             <div class="col-md-7 ps-3">
                                 <div class="tab-content">
+
+                                    <!-- PLACEHOLDER PER SOSTITUIRE LE LISTE -->
+                                    <div class="tab-pane active text-center text-muted py-2"
+                                        id="placeholder-{{ classes.id }}">
+                                        <p class="small mb-0">Select a session on the left to view enrollments.</p>
+                                    </div>
+
                                     {% for session in session_classes if session.COOKING_CLASS_id == classes.id %}
-                                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}"
-                                        id="session-pane-{{ session.id }}">
-
-                                        <!-- Info rapide sui posti -->
-                                        <!-- <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom"> -->
-                                        <div class="d-flex mb-2 pb-1">
-                                            <strong class="small">STUDENT BOOKINGS</strong>
-                                        </div>
-
+                                    <div class="tab-pane fade" id="session-pane-{{ classes.id }}-{{ session.id }}">
 
                                         <div class="row g-2">
                                             <!-- Iscritti -->
@@ -313,6 +320,8 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                     {% else %}
                                     <p class="text-muted small text-center py-5">Add a session to view enrollments.</p>
                                     {% endfor %}
+
+
                                 </div>
                             </div>
 
@@ -344,7 +353,6 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                 <form action="{{ url_for('add_session') }}" method="POST">
                     <div class="modal-body py-3">
                         <input type="hidden" name="cooking_class_id" value="{{ classes.id }}">
-
                         <div class="row g-2">
                             <div class="col-6">
                                 <label class="form-label small fw-semibold mb-1">Day</label>
@@ -389,5 +397,73 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
         </div>
     </div>
     {% endfor %}
+
+
+    <!-- MODALI PER MODIFICA E CANCELLAZIONE SESSIONI -->
+    {% for session in session_classes %}
+    {% if session.enrolled_count == 0 %}
+    <div class="modal fade" id="editSessionModal-{{ session.id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-dark">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title fw-bold">Manage Session</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form action="{{ url_for('edit_session', session_id=session.id) }}" method="POST">
+                    <div class="modal-body py-3">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold mb-1">Day</label>
+                                <select name="day_of_week" class="form-select form-select-sm border-dark" required>
+                                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday',
+                                    'Sunday'] %}
+                                    <option value="{{ day }}" {% if session.day_of_week==day %}selected{% endif %}>{{
+                                        day }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold mb-1">Time</label>
+                                <input type="time" name="start_time" class="form-control form-control-sm border-dark"
+                                    value="{{ session.start_time }}" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold mb-1">Kitchen</label>
+                                <input type="text" name="kitchen" class="form-control form-control-sm border-dark"
+                                    value="{{ session.kitchen }}" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold mb-1">Capacity</label>
+                                <input type="number" name="max_capacity"
+                                    class="form-control form-control-sm border-dark" min="1" max="10"
+                                    value="{{ session.max_capacity }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer py-2 d-flex justify-content-between">
+                        <!-- Cancellazione spostata qui dentro: sicura e discreta -->
+                        <button type="submit" formaction="{{ url_for('delete_session', session_id=session.id) }}"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('Are you sure you want to delete this session?');">
+                            Delete
+                        </button>
+
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-secondary"
+                                data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+
+
 </div>
 {% endblock %}
