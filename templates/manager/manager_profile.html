@@ -197,101 +197,92 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                             </div>
                         </div>
 
-                        <div class="row g-0">
-                            <div class="col-md-5 border-end pe-3">
-
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <strong class="small">SCHEDULED SESSIONS</strong>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addSessionModal-{{ classes.id }}">
-                                        + Add Session
-                                    </button>
-                                </div>
-
-                                <div class="nav flex-column">
-                                    {% for session in session_classes %}
-                                    {% if session.COOKING_CLASS_id == classes.id %}
-
-                                    <!-- RETTANGOLO SESSIONE -->
-                                    <div class="d-flex align-items-center gap-2 mb-1">
-                                        <div class="border border-dark rounded-3 d-flex align-items-center justify-content-between session-row nav-link w-75"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#session-pane-{{ classes.id}}-{{ session.id }}" role="tab">
-
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span>📅</span>
-                                                <div>
-                                                    <div class="fw-bold text-dark small">{{ session.day_of_week }} • {{ session.start_time }}</div>
-                                                    <small class="text-muted">{{ session.kitchen }}</small>
-                                                </div>
-                                            </div>
-
-                                            <span class="badge bg-secondary-subtle text-dark rounded-pill">{{ session.enrolled_count }}/{{ session.max_capacity }}</span>
-                                        </div>
-
-                                        <!-- BOTTONE / AVVISO-->
-                                        <div class="flex-grow-1 text-center">
-                                            {% if session.enrolled_count == 0 %}
-                                            <button type="button" class="btn btn-sm btn-outline-secondary w-100"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editSessionModal-{{ session.id }}">
-                                                Edit
-                                            </button>
-                                            {% else %}
-                                            <span class="text-muted small">Cannot edit</span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-
-                                    {% endif %}
-                                    {% endfor %}
-                                </div>
+                        <!-- TABELLA SESSIONI SEMPLIFICATA -->
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold small mb-0">SCHEDULED SESSIONS</h6>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#addSessionModal-{{ classes.id }}">
+                                    + Add Session
+                                </button>
                             </div>
 
-                            <!-- COLONNA 7: DETTAGLIO STUDENTI (Pannelli collegati) -->
-                            <div class="col-md-7 ps-3">
-                                <div class="tab-content">
+                            <div class="table-responsive border border-dark rounded-3">
+                                <table class="table table-sm table-hover align-middle mb-0 text-center">
+                                    <thead class="table-light border-bottom border-dark small">
+                                        <tr>
+                                            <th class="text-start ps-3">Schedule</th>
+                                            <th>Kitchen</th>
+                                            <th>Capacity</th>
+                                            <th class="text-start">Students</th>
+                                            <th class="text-end pe-3">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="small">
+                                        {% set class_sessions = session_classes | selectattr("COOKING_CLASS_id", "equalto", classes.id) | list %}
+                                        {% for session in class_sessions %}
+                                        <tr>
+                                            <!-- Giorno e Ora -->
+                                            <td class="text-start ps-3 fw-bold">
+                                                📅 {{ session.day_of_week }} <span class="text-muted fw-normal">• {{ session.start_time }}</span>
+                                            </td>
 
-                                    <!-- PLACEHOLDER PER SOSTITUIRE LE LISTE -->
-                                    <div class="tab-pane active text-center text-muted py-2" id="placeholder-{{ classes.id }}">
-                                        <p class="small mb-0">Select a session on the left to view enrollments.</p>
-                                    </div>
+                                            <!-- Cucina -->
+                                            <td>{{ session.kitchen }}</td>
 
-                                    {% for session in session_classes if session.COOKING_CLASS_id == classes.id %}
-                                    <div class="tab-pane fade" id="session-pane-{{ classes.id }}-{{ session.id }}">
+                                            <!-- Posti occupati -->
+                                            <td>
+                                                <span class="badge bg-secondary-subtle text-dark rounded-pill">
+                                                    {{ session.enrolled_count }}/{{ session.max_capacity }}
+                                                </span>
+                                            </td>
 
-                                        <div class="row g-2">
-                                            <!-- ISCRITTI -->
-                                            <div class="col-6">
-                                                <h6 class="small fw-bold text-success mb-1">ENROLLED ({{ session.enrolled_count }})</h6>
-                                                <ul
-                                                    class="list-group list-group-flush border rounded student-list-box small">
-                                                    {% for student in session.enrolled_students %}
-                                                    <li class="list-group-item">{{ student.first_name }} {{ student.last_name }}</li>
-                                                    {% else %}
-                                                    <li class="list-group-item text-muted">No students enrolled</li>
-                                                    {% endfor %}
-                                                </ul>
-                                            </div>
+                                            <!-- Elenco Studenti compatto -->
+                                            <td class="text-start">
+                                                <!-- ISCRITTI -->
+                                                <div class="mb-1">
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Enrolled: {{ session.enrolled_count }}</span>
+                                                    <small class="text-muted ms-1">
+                                                        {% for s in session.enrolled_students %}
+                                                            {{ s.first_name }} {{ s.last_name }}{% if not loop.last %}, {% endif %}
+                                                        {% else %}
+                                                            None
+                                                        {% endfor %}
+                                                    </small>
+                                                </div>
+                                                <!-- WAITING -->
+                                                {% if session.waiting_students|length > 0 %}
+                                                <div>
+                                                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle">Waiting: {{ session.waiting_students|length }}</span>
+                                                    <small class="text-muted ms-1">
+                                                        {% for s in session.waiting_students %}
+                                                            {{ loop.index }}. {{ s.first_name }} {{ s.last_name }}{% if not loop.last %}, {% endif %}
+                                                        {% endfor %}
+                                                    </small>
+                                                </div>
+                                                {% endif %}
+                                            </td>
 
-                                            <!-- WAITING -->
-                                            <div class="col-6">
-                                                <h6 class="small fw-bold text-warning mb-1">WAITING ({{ session.waiting_students|length }})</h6>
-                                                <ol
-                                                    class="list-group list-group-flush border rounded student-list-box small">
-                                                    {% for student in session.waiting_students %}
-                                                    <li class="list-group-item">{{ student.first_name }} {{ student.last_name }}</li>
-                                                    {% else %}
-                                                    <li class="list-group-item text-muted list-unstyled">Empty waiting list</li>
-                                                    {% endfor %}
-                                                </ol>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    {% else %}
-                                    <p class="text-muted small text-center py-5">Add a session to view enrollments.</p>
-                                    {% endfor %}
-                                </div>
+                                            <!-- Azioni -->
+                                            <td class="text-end pe-3">
+                                                {% if session.enrolled_count == 0 %}
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editSessionModal-{{ session.id }}">
+                                                    Edit
+                                                </button>
+                                                {% else %}
+                                                <span class="text-muted" style="font-size: 0.8rem;">Cannot edit</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-muted py-3">No sessions scheduled for this class.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
