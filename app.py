@@ -271,6 +271,10 @@ def manager_profile():
     all_ingredients = cooking_class_dao.get_all_ingredients()
     stats = user_dao.get_manager_stats(current_user.email)
 
+    all_classes = [dict(c) for c in all_classes]
+    for c in all_classes:
+        c["sessions"] = [s for s in session_classes if s["COOKING_CLASS_id"] == c["id"]]
+
     session_classes = [dict(session) for session in session_classes]
     for session in session_classes:
         session["enrolled_students"] = user_dao.get_students_by_session_and_status(session["id"], "ENROLLED")

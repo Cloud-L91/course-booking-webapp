@@ -106,6 +106,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                             <div id="ratingCarousel" class="carousel slide" data-bs-ride="carousel"
                                 data-ride="carousel">
                                 <div class="carousel-inner">
+                                    <!-- TITOLO -->
                                     {% for title in stats.highest_rated_classes %}
                                     <div class="carousel-item {% if loop.first %}active{% endif %}">
                                         <div class="fw-bold text-dark fs-5 mb-1 text-truncate"
@@ -131,7 +132,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
         </div>
     </div>
 
-    <!-- ACCORDION PER GLI ELENCHI DELLE SESSIONI -->
+    <!-- ACCORDION PER CLASSI CON ELENCHI DELLE SESSIONI -->
     <div class="border border-dark rounded-3 p-3 my-4">
         {% if all_classes %}
         <div class="accordion" id="classesAccordion">
@@ -145,16 +146,21 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                 <img src="{{ url_for('static', filename='img/classes/' ~ classes.photo_1) }}"
                                     class="class-manager-img rounded flex-shrink-0 me-3" alt="">
                                 <span>
-                                    <strong>{{ classes.title }}</strong>
-                                    <br><br>
-                                    {{ classes.cuisine }} • Chef {{ classes.chef_name }} • {{ classes.duration }} min
-                                    per session
+                                    <div class="d-flex align-middle gap-2">
+                                        <strong>{{ classes.title }}</strong>
+                                        <span class="badge rounded-pill
+                                            {% if classes.difficulty == 'Beginner' %}bg-success
+                                            {% elif classes.difficulty == 'Intermediate' %}bg-warning text-dark
+                                            {% elif classes.difficulty == 'Advanced' %}bg-danger
+                                            {% else %}bg-secondary
+                                            {% endif %}">
+                                            {{ classes.difficulty }}
+                                        </span>
+                                    </div>
+                                    <br>
+                                    {{ classes.cuisine }} • Chef {{ classes.chef_name }} • {{ classes.dietary_category
+                                    }} • {{ classes.duration }} min per session
                                 </span>
-                            </div>
-
-                            <div class="d-flex align-items-center gap-2">
-                                <h6><span class="badge badge-classes-mng">{{ classes.difficulty }}</span></h6>
-                                <h6><span class="badge badge-classes-mng">{{ classes.dietary_category }}</span></h6>
                             </div>
                         </div>
                     </button>
@@ -164,6 +170,49 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                 <div id="collapse-{{ classes.id }}" class="accordion-collapse collapse"
                     data-bs-parent="#classesAccordion">
                     <div class="accordion-body">
+
+
+                        <!-- DETTAGLI CLASSE (DESCRIZIONE, INGREDIENTI, FOTO EXTRA) -->
+                        <div class="border rounded-3 p-3 mb-3 border-dark">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-3">
+
+                                    <h6 class="fw-bold small mb-3">EXTRA PHOTOS</strong>
+                                        <div class="d-flex gap-2">
+                                            {% if classes.photo_2 %}
+                                            <img src="{{ url_for('static', filename='img/classes/' ~ classes.photo_2) }}"
+                                                class="class-manager-img rounded border border-dark flex-fill mt-3">
+                                            {% endif %}
+                                            {% if classes.photo_3 %}
+                                            <img src="{{ url_for('static', filename='img/classes/' ~ classes.photo_3) }}"
+                                                class="class-manager-img rounded border border-dark flex-fill mt-3">
+                                            {% endif %}
+                                        </div>
+                                </div>
+                                <div class="col-12 col-md-5">
+
+                                    <h6 class="fw-bold small mb-2">DESCRIPTION</h6>
+                                    <p class="small text-dark">{{ classes.description }}
+                                    </p>
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                    <h6 class="fw-bold small mb-2">INGREDIENTS</h6>
+                                    <ul class="list-unstyled mb-0 overflow-auto">
+                                        {% for ing in all_ingredients %}
+                                        {% if ing.COOKING_CLASS_id == classes.id %}
+
+                                        <!-- <li class="small text-dark py-1">• {{ ing.name }}</li> -->
+
+                                        <span class="badge bg-light text-dark border rounded-2 p-1 me-1 mb-1">{{
+                                            ing.name }}</span>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
 
 
                         <div class="row g-0">
@@ -180,35 +229,29 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                 <table class="table table-sm table-hover align-middle border small mb-0 p-2">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Day/Time</th>
-                                            <th>Kitchen</th>
-                                            <th>Enrolled</th>
-                                            <th>Rating</th>
-                                            <th>Action</th>
+                                            <th class="small">DAY/TIME</th>
+                                            <th class="small">KITCHEN</th>
+                                            <th class="small">AVAILABLE SPOTS</th>
+                                            <th class="small">ACTION</th>
                                         </tr>
                                     </thead>
                                     <tbody class="nav">
                                         {% for session in session_classes %}
                                         {% if session.COOKING_CLASS_id == classes.id %}
-                                        <tr class="align-middle session-row"
-                                            data-bs-toggle="tab" 
-                                            data-bs-target="#session-pane-{{ session.id }}"
-                                            role="tab">
-                                            <td class="fw-semibold text-dark">{{ session.day_of_week }} at {{ session.start_time }}</td>
+                                        <tr class="align-middle session-row" data-bs-toggle="tab"
+                                            data-bs-target="#session-pane-{{ session.id }}" role="tab">
+                                            <td class="fw-semibold text-dark">{{ session.day_of_week }} at {{
+                                                session.start_time }}</td>
                                             <td>{{ session.kitchen }}</td>
                                             <td>{{ session.enrolled_count }}/{{ session.max_capacity }}</td>
-                                            <td>{% if session.avg_rating %}
-                                                {{ session.avg_rating }} ★
-                                                {% else %}
-                                                'N/A'
-                                                {% endif %}
-                                            </td>
                                             <td class="text-center">
                                                 {% if session.enrolled_count > 0 %}
                                                 <span class="text-muted">Booked</span>
                                                 {% else %}
-                                                <form action="{{ url_for('delete_session', session_id=session.id) }}" method="POST">
-                                                    <button type="submit" class="btn btn-close btn-outline-danger" aria-label="Close"></button>
+                                                <form action="{{ url_for('delete_session', session_id=session.id) }}"
+                                                    method="POST">
+                                                    <button type="submit" class="btn btn-close btn-outline-danger"
+                                                        aria-label="Close"></button>
                                                 </form>
                                                 {% endif %}
                                             </td>
@@ -227,23 +270,22 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                         id="session-pane-{{ session.id }}">
 
                                         <!-- Info rapide sui posti -->
-                                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                                            <span class="small"> Available spots:
-                                                <strong>{{ session.max_capacity - session.enrolled_count }}</strong>
-                                            </span>
-                                            <span class="badge bg-warning text-dark">
-                                                {{ session.avg_rating if session.avg_rating else 'N/A' }} ★
-                                            </span>
+                                        <!-- <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom"> -->
+                                        <div class="d-flex mb-2 pb-1">
+                                            <strong class="small">STUDENT BOOKINGS</strong>
                                         </div>
+
 
                                         <div class="row g-2">
                                             <!-- Iscritti -->
                                             <div class="col-6">
-                                                <h6 class="small fw-bold text-success mb-1">ENROLLED ({{ session.enrolled_count }})</h6>
+                                                <h6 class="small fw-bold text-success mb-1">ENROLLED ({{
+                                                    session.enrolled_count }})</h6>
                                                 <ul
                                                     class="list-group list-group-flush border rounded student-list-box small">
                                                     {% for student in session.enrolled_students %}
-                                                    <li class="list-group-item">{{ student.first_name }} {{ student.last_name }}</li>
+                                                    <li class="list-group-item">{{ student.first_name }} {{
+                                                        student.last_name }}</li>
                                                     {% else %}
                                                     <li class="list-group-item text-muted">No students enrolled</li>
                                                     {% endfor %}
@@ -252,13 +294,16 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
 
                                             <!-- Lista d'attesa -->
                                             <div class="col-6">
-                                                <h6 class="small fw-bold text-warning mb-1">WAITING ({{ session.waiting_students|length }})</h6>
+                                                <h6 class="small fw-bold text-warning mb-1">WAITING ({{
+                                                    session.waiting_students|length }})</h6>
                                                 <ol
                                                     class="list-group list-group-flush border rounded student-list-box small">
                                                     {% for student in session.waiting_students %}
-                                                    <li class="list-group-item">{{ student.first_name }} {{ student.last_name }}</li>
+                                                    <li class="list-group-item">{{ student.first_name }} {{
+                                                        student.last_name }}</li>
                                                     {% else %}
-                                                    <li class="list-group-item text-muted list-unstyled">Empty waiting list</li>
+                                                    <li class="list-group-item text-muted list-unstyled">Empty waiting
+                                                        list</li>
                                                     {% endfor %}
                                                 </ol>
                                             </div>
@@ -283,8 +328,6 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
         </div>
         {% endif %}
     </div>
-
-
 
 
     <!-- MODAL PER SESSIONE -->
