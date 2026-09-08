@@ -14,30 +14,16 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
 
     <div class="row mt-4">
         <div class="col-12">
-
             <ul class="nav nav-tabs nav-justified">
-                <li class="nav-item">
-                    <a class="nav-link active" data-bs-toggle="tab" href="#booked">
-                        <strong>Booked</strong>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#waiting">
-                        <strong>Waiting lists</strong>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#passed">
-                        <strong>Passed</strong>
-                    </a>
-                </li>
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#booked"><strong>Booked</strong></a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#waiting"><strong>Waiting lists</strong></a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#passed"><strong>Passed</strong></a></li>
             </ul>
 
             <div class="border border-top-0 rounded-bottom-3 p-3">
                 <div class="tab-content border rounded-3 p-3">
 
                     <!-- PRENOTATI -->
-
                     <div id="booked" class="tab-pane fade show active">
                         {% if upcoming_sessions %}
                         <div class="row row-cols-1 row-cols-md-2 g-4">
@@ -49,18 +35,13 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                             <h5 class="card-title fw-bold mb-0">{{ upcoming.title }}</h5>
                                         </div>
 
-                                        <p class="card-text mb-3">{{ upcoming.cuisine }} • Chef {{ upcoming.chef_name }}
-                                        </p>
-
+                                        <p class="card-text mb-3">{{ upcoming.cuisine }} • Chef {{ upcoming.chef_name }}</p>
                                         <ul class="list-unstyled small mb-3">
-                                            <li><i class="bi bi-calendar3 me-1"></i> {{ upcoming.day_of_week }} at {{
-                                                upcoming.start_time }}</li>
+                                            <li><i class="bi bi-calendar3 me-1"></i> {{ upcoming.day_of_week }} at {{ upcoming.start_time }}</li>
                                             <li><i class="bi bi-clock me-1"></i> {{ upcoming.duration }} min</li>
                                             <li><i class="bi bi-geo-alt me-1"></i> {{ upcoming.kitchen }}</li>
                                         </ul>
-
-                                        <a href="{{ url_for('session_details', session_id=upcoming.id) }}"
-                                            class="btn btn-outline-success btn-sm w-100">
+                                        <a href="{{ url_for('session_details', session_id=upcoming.id) }}" class="btn btn-outline-success btn-sm w-100">
                                             <i class="bi bi-info-circle me-1"></i> View details
                                         </a>
                                     </div>
@@ -69,14 +50,11 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                             {% endfor %}
                         </div>
                         {% else %}
-                        <div class="col-12 text-center py-5 text-muted">
-                            <p class="mb-0">You haven't made any reservations yet.</p>
-                        </div>
+                        <div class="col-12 text-center py-5 text-muted"><p class="mb-0">You haven't made any reservations yet.</p></div>
                         {% endif %}
                     </div>
 
                     <!-- IN ATTESA -->
-
                     <div id="waiting" class="tab-pane fade">
                         <table class="table table-hover caption-top">
                             <thead class="table-secondary">
@@ -97,16 +75,13 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                         <td>
                                             <strong>{{ waiting.title }}</strong>
                                             <br>
-                                            <small class="text-muted">{{ waiting.cuisine }} • Chef {{ waiting.chef_name
-                                                }}</small>
+                                            <small class="text-muted">{{ waiting.cuisine }} • Chef {{ waiting.chef_name }}</small>
                                         </td>
                                         <td>{{ waiting.day_of_week }} at {{ waiting.start_time }}</td>
                                         <td>{{ waiting.duration }} min</td>
                                         <td>{{ waiting.kitchen }}</td>
                                         <td class="text-center">
-                                            <span class="badge rounded-pill bg-warning text-dark px-3 py-1">
-                                                #{{ waiting.waiting_position }}
-                                            </span>
+                                            <span class="badge rounded-pill bg-warning text-dark px-3 py-1">#{{ waiting.waiting_position }}</span>
                                         </td>
                                     </div>
                                 </tr>
@@ -116,7 +91,6 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                     </div>
 
                     <!-- PASSATE -->
-
                     <div id="passed" class="tab-pane fade">
                         <table class="table table-hover caption-top">
                             <thead class="table-secondary">
@@ -144,15 +118,11 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                         <td>{{ passed.duration }} min</td>
                                         <td>{{ passed.kitchen }}</td>
                                         {% if passed.rating %}
-                                        <td>{{ passed.rating }}/5
-                                            <i class="bi bi-star-fill text-warning"></i>
-                                        </td>
+                                        <td>{{ passed.rating }}/5<i class="bi bi-star-fill text-warning"></i></td>
                                         {% else%}
                                         <td>
-                                            <form action="{{ url_for('rate_session', session_id=passed.id) }}"
-                                                method="POST" class="d-flex gap-1 align-items-center">
-                                                <select name="rating" class="form-select form-select-sm"
-                                                    style="width: 75px;" required>
+                                            <form action="{{ url_for('rate_session', session_id=passed.id) }}" method="POST" class="d-flex gap-1 align-items-center">
+                                                <select name="rating" class="form-select form-select-sm" style="width: 75px;" required>
                                                     <option value="" disabled selected>-</option>
                                                     <option value="5">5 ★</option>
                                                     <option value="4">4 ★</option>
@@ -160,9 +130,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                                     <option value="2">2 ★</option>
                                                     <option value="1">1 ★</option>
                                                 </select>
-                                                <button type="submit" class="btn btn-outline-success btn-sm">
-                                                    Send
-                                                </button>
+                                                <button type="submit" class="btn btn-outline-success btn-sm">Send</button>
                                             </form>
                                         </td>
                                         {% endif%}

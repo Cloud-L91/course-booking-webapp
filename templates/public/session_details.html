@@ -14,15 +14,15 @@ The cake is a lie - {{ session_class.title }}
             <div class="row">
                 <div class="col-md-6">
                     <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_1) }}"
-                        class="rounded w-100 mb-2 object-fit-cover detail-main-img" alt="">
+                        class="rounded w-100 mb-2 object-fit-cover detail-main-img">
                     <div class="row">
                         <div class="col-6">
                             <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_2) }}"
-                                class="rounded w-100 object-fit-cover detail-thumb-img" alt="">
+                                class="rounded w-100 object-fit-cover detail-thumb-img">
                         </div>
                         <div class="col-6">
                             <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_3) }}"
-                                class="rounded w-100 object-fit-cover detail-thumb-img" alt="">
+                                class="rounded w-100 object-fit-cover detail-thumb-img">
                         </div>
                     </div>
                 </div>
@@ -57,8 +57,7 @@ The cake is a lie - {{ session_class.title }}
                         <div class="col-md-6">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item"><strong>Day:</strong> {{ session_class.day_of_week }}</li>
-                                <li class="list-group-item"><strong>Beginning time:</strong> {{ session_class.start_time
-                                    }}</li>
+                                <li class="list-group-item"><strong>Beginning time:</strong> {{ session_class.start_time }}</li>
                                 <li class="list-group-item"><strong>Duration:</strong> {{ session_class.duration }}</li>
                                 <li class="list-group-item"><strong>Classroom:</strong> {{ session_class.kitchen }}</li>
                             </ul>
@@ -66,10 +65,8 @@ The cake is a lie - {{ session_class.title }}
                         <div class="col-md-6">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item"><strong>Cuisine:</strong> {{ session_class.cuisine }}</li>
-                                <li class="list-group-item"><strong>Difficulty:</strong> {{ session_class.difficulty }}
-                                </li>
-                                <li class="list-group-item"><strong>Dietary category:</strong> {{
-                                    session_class.dietary_category }}</li>
+                                <li class="list-group-item"><strong>Difficulty:</strong> {{ session_class.difficulty }}</li>
+                                <li class="list-group-item"><strong>Dietary category:</strong> {{ session_class.dietary_category }}</li>
                                 <li class="list-group-item"><strong>Chef:</strong> {{ session_class.chef_name }}</li>
                             </ul>
                         </div>
@@ -82,8 +79,7 @@ The cake is a lie - {{ session_class.title }}
                 <div class="card border-0 p-3">
                     <ul class="list-unstyled mb-0">
                         {% for ingredient in ingredients %}
-                        <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i>{{ ingredient.name }}
-                        </li>
+                        <li class="py-1"><i class="bi bi-check-circle-fill text-success me-2"></i>{{ ingredient.name }}</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -98,8 +94,7 @@ The cake is a lie - {{ session_class.title }}
                     <p class="text-muted small mb-1">Enrolled students</p>
 
                     <div class="h3 fw-bold text-success mb-2">
-                        {{ session_class.max_capacity - available_spots }} <span class="text-muted fs-5 fw-normal"> / {{
-                            session_class.max_capacity }}</span>
+                        {{ session_class.max_capacity - available_spots }} <span class="text-muted fs-5 fw-normal"> / {{ session_class.max_capacity }}</span>
                     </div>
 
                     <!-- UTENTE ANONIMO -->
@@ -110,9 +105,7 @@ The cake is a lie - {{ session_class.title }}
                         {% elif session_in_progress %}
                         <button class="btn btn-secondary w-100 py-2 fw-semibold mb-3" disabled>Session started</button>
                         {% else %}
-                        <a href="{{ url_for('login') }}" class="btn btn-primary w-100 py-2 fw-semibold mb-3">
-                            Log in to participate
-                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-primary w-100 py-2 fw-semibold mb-3">Log in to participate</a>
                         {% endif %}
 
                     <!-- UTENTE STUDENTE -->
@@ -135,108 +128,99 @@ The cake is a lie - {{ session_class.title }}
 
                     <!-- SE SESSIONE IN CORSO -->
 
-                    {% elif session_in_progress %}
-                        <div class="alert alert-info d-flex align-items-center mb-3 py-2" role="alert">
-                            <i class="bi bi-hourglass-split me-2 fs-5"></i>
-                            <p class="mb-0">This session is currently in progress.</p>
-                        </div>
+                        {% elif session_in_progress %}
+                            <div class="alert alert-info d-flex align-items-center mb-3 py-2" role="alert">
+                                <i class="bi bi-hourglass-split me-2 fs-5"></i>
+                                <p class="mb-0">This session is currently in progress.</p>
+                            </div>
 
-                        {% if user_status == 'ENROLLED' %}
+                            {% if user_status == 'ENROLLED' %}
+                            <div class="alert alert-success d-flex align-items-center mb-3 py-2" role="alert">
+                                <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                                <p class="mb-0">You are currently attending this session!</p>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm w-100 disabled" disabled>Cannot cancel (session started)</button>
+
+                            {% elif user_status == 'WAITING' %}
+                            <div class="alert alert-warning d-flex align-items-center mb-3 py-2" role="alert">
+                                <i class="bi bi-clock-history me-2 fs-5"></i>
+                                <p class="mb-0">You are on the waiting list, but this session has already started.</p>
+                            </div>
+                            <form method="POST" action="{{ url_for('delete_booking', session_id=session_id) }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Leave the waiting list</button>
+                            </form>
+
+                            {% else %}
+                            <button class="btn btn-secondary w-100 py-2 fw-semibold mb-2" disabled>Session in progress</button>
+                            <p class="text-muted small mb-0">This session has already started. Enrollments and waiting list are closed.</p>
+                            {% endif %}
+
+                        <!-- STATUS ENROLLED -->
+
+                        {% elif user_status == 'ENROLLED' %}
                         <div class="alert alert-success d-flex align-items-center mb-3 py-2" role="alert">
                             <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                            <p class="mb-0">You are currently attending this session!</p>
+                            <p class="mb-0">You are already registered for this session!</p>
                         </div>
-                        <button class="btn btn-outline-secondary btn-sm w-100 disabled" disabled>Cannot cancel (session
-                            started)</button>
+                        <br>
+
+                        <!-- SE ENTRO LE 12 ORE -->
+
+                            {% if deletable %}
+
+                            <form method="POST" action="{{ url_for('delete_booking', session_id=session_id) }}">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">Cancel booking</button>
+                            </form>
+
+                            {% else %}
+                            <button class="btn btn-outline-secondary btn-sm disabled">Cancel booking (less than 12h)</button>
+                            {% endif %}
+
+                        <!-- STATUS WAITING -->
 
                         {% elif user_status == 'WAITING' %}
                         <div class="alert alert-warning d-flex align-items-center mb-3 py-2" role="alert">
                             <i class="bi bi-clock-history me-2 fs-5"></i>
-                            <p class="mb-0">You are on the waiting list, but this session has already started.</p>
+                            <p class="mb-0">You are already on the waiting list for this session.</p>
                         </div>
+
                         <form method="POST" action="{{ url_for('delete_booking', session_id=session_id) }}">
                             <button type="submit" class="btn btn-outline-danger btn-sm">Leave the waiting list</button>
                         </form>
 
                         {% else %}
-                        <button class="btn btn-secondary w-100 py-2 fw-semibold mb-2" disabled>Session in progress</button>
-                        <p class="text-muted small mb-0">This session has already started. Enrollments and waiting list are
-                            closed.</p>
+
+                        <!-- SE LO STUDENTE NON È ISCRITTO -->
+
+                            {% if available_spots > 0 %}
+                                {% if max_bookings_reached %}
+                                <button class="btn btn-secondary w-100 py-2 fw-semibold mb-2" disabled>Booking limit reached (4/4)</button>
+                                <p class="text-muted small mb-3">You have already booked the maximum allowed of 4 active sessions.</p>
+                                {% else%}
+
+                                    {% if has_conflict %}
+                                    <div class="alert alert-warning py-2 mb-2">
+                                        <i class="bi bi-exclamation-triangle"></i> You already have another lesson confirmed at this
+                                        time.
+                                    </div>
+                                    <button class="btn btn-secondary w-100" disabled>Schedule not available</button>
+                                    {% else %}
+                                    <form action="{{ url_for('enroll', session_id=session_id) }}" method="POST">
+                                        <button type="submit" class="btn btn-primary w-100">Sign up for the session</button>
+                                    </form>
+                                    {% endif %}
+                                {% endif %}
+
+                            {% else %}
+                            <button class="btn btn-secondary w-100 py-2 fw-semibold" disabled>Fully booked</button>
+                            <hr class="my-4">
+                            <h6 class="fw-bold mb-3">No spots available?</h6>
+                            <form method="POST" action="{{ url_for('enroll', session_id=session_id) }}">
+                                <button type="submit" class="btn btn-warning w-100 py-2 fw-semibold mb-3">Join the waiting list</button>
+                            </form>
+                            <p class="text-muted small mb-1">You will be automatically enrolled if conditions permit.</p>
+                            {% endif %}
                         {% endif %}
-
-                    <!-- STATUS ENROLLED -->
-
-                    {% elif user_status == 'ENROLLED' %}
-                    <div class="alert alert-success d-flex align-items-center mb-3 py-2" role="alert">
-                        <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                        <p class="mb-0">You are already registered for this session!</p>
-                    </div>
-                    <br>
-
-                    <!-- SE ENTRO LE 12 ORE -->
-
-                    {% if deletable %}
-
-                    <form method="POST" action="{{ url_for('delete_booking', session_id=session_id) }}">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Cancel booking</button>
-                    </form>
-
-                    {% else %}
-                    <button class="btn btn-outline-secondary btn-sm disabled">Cancel booking (less than 12h)</button>
-                    {% endif %}
-
-                    <!-- STATUS WAITING -->
-
-                    {% elif user_status == 'WAITING' %}
-                    <div class="alert alert-warning d-flex align-items-center mb-3 py-2" role="alert">
-                        <i class="bi bi-clock-history me-2 fs-5"></i>
-                        <p class="mb-0">You are already on the waiting list for this session.</p>
-                    </div>
-
-                    <form method="POST" action="{{ url_for('delete_booking', session_id=session_id) }}">
-                        <button type="submit" class="btn btn-outline-danger btn-sm">Leave the waiting list</button>
-                    </form>
-
-                    {% else %}
-
-                    <!-- SE LO STUDENTE NON È ISCRITTO -->
-
-                    {% if available_spots > 0 %}
-                    {% if max_bookings_reached %}
-                    <button class="btn btn-secondary w-100 py-2 fw-semibold mb-2" disabled>
-                        Booking limit reached (4/4)
-                    </button>
-                    <p class="text-muted small mb-3">
-                        You have already booked the maximum allowed of 4 active sessions.
-                    </p>
-                    {% else%}
-
-
-                    {% if has_conflict %}
-                    <div class="alert alert-warning py-2 mb-2">
-                        <i class="bi bi-exclamation-triangle"></i> You already have another lesson confirmed at this
-                        time.
-                    </div>
-                    <button class="btn btn-secondary w-100" disabled>Schedule not available</button>
-                    {% else %}
-                    <form action="{{ url_for('enroll', session_id=session_id) }}" method="POST">
-                        <button type="submit" class="btn btn-primary w-100">Sign up for the session</button>
-                    </form>
-                    {% endif %}
-                    {% endif %}
-
-                    {% else %}
-                    <button class="btn btn-secondary w-100 py-2 fw-semibold" disabled>Fully booked</button>
-                    <hr class="my-4">
-                    <h6 class="fw-bold mb-3">No spots available?</h6>
-                    <form method="POST" action="{{ url_for('enroll', session_id=session_id) }}">
-                        <button type="submit" class="btn btn-warning w-100 py-2 fw-semibold mb-3">
-                            Join the waiting list
-                        </button>
-                    </form>
-                    <p class="text-muted small mb-1">You will be automatically enrolled if conditions permit.</p>
-                    {% endif %}
-                    {% endif %}
 
                     {% elif current_user.role == 'manager' %}
 
@@ -246,11 +230,7 @@ The cake is a lie - {{ session_class.title }}
                     <hr class="my-4">
 
                     <div class="card text-bg-light p-4 mt-4">
-                        <h6 class="fw-bold mb-3">
-                            <i class="bi bi-info-circle me-2 text-primary"></i>
-                            Cancellation rules
-                        </h6>
-
+                        <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2 text-primary"></i>Cancellation rules</h6>
                         <p class="small mb-0">
                             You can cancel your registration up to 12 hours before the session begins.
                             After this time, cancellation will no longer be possible.

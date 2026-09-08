@@ -88,15 +88,14 @@ def promote_waiting_list(session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute(
-        """
+    query = """
         SELECT id, USER_email
         FROM BOOKING 
         WHERE CLASS_SESSION_id = ? AND status = 'WAITING' 
         ORDER BY id ASC
-        """,
-        (session_id,)
-    )
+        """
+
+    cursor.execute(query,(session_id,))
 
     waiting_users = cursor.fetchall()
 
@@ -112,11 +111,7 @@ def get_user_bookings(user_email):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT * 
-        FROM BOOKING 
-        WHERE BOOKING.USER_email = ?
-    """, (user_email,))
+    cursor.execute("SELECT * FROM BOOKING WHERE BOOKING.USER_email = ?", (user_email,))
     bookings = cursor.fetchall()
 
     utilities_dao.close_connection(conn, cursor)
@@ -143,7 +138,8 @@ def get_user_enrolled_sessions(user_email):
           AND CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
           AND BOOKING.USER_email = ?
           AND BOOKING.status IN ('ENROLLED', 'WAITING')
-    """
+        """
+    
     cursor.execute(query, (user_email,))
     booked_sessions = cursor.fetchall()
 
@@ -158,7 +154,7 @@ def get_user_rating(user_email, session_id):
         SELECT rating
         FROM BOOKING
         WHERE USER_email = ? AND CLASS_SESSION_id = ?
-    """
+        """
     cursor.execute(query, (user_email, session_id))
     rating = cursor.fetchone()
 
@@ -177,7 +173,7 @@ def set_user_rating(user_email, session_id, rating):
         UPDATE BOOKING
         SET rating = ?
         WHERE USER_email = ? AND CLASS_SESSION_id = ? AND rating IS NULL
-    """
+        """
 
     cursor.execute(query, (rating, user_email, session_id))
     success = cursor.rowcount > 0
@@ -208,7 +204,7 @@ def get_waiting_list_positions(user_email, session_id):
                 WHERE CLASS_SESSION_id = ?
                     AND USER_email = ?
             )
-    """
+        """
     cursor.execute(query, (session_id, session_id, user_email))
     waiting_list = cursor.fetchone()
 

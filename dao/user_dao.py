@@ -24,16 +24,16 @@ def get_students_by_session_and_status(session_id, status):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    query = """
         SELECT *
         FROM USER, BOOKING
         WHERE BOOKING.USER_email = USER.email
             AND USER.role = 'student'
             AND BOOKING.CLASS_SESSION_id = ? AND BOOKING.status = ?
-    """, (session_id, status))
+        """
 
+    cursor.execute(query, (session_id, status))
     students = cursor.fetchall()
-
     utilities_dao.close_connection(conn, cursor)
 
     return students
@@ -58,10 +58,11 @@ def get_manager_stats(email):
     stats["total_classes"] = cursor.fetchone()["total_classes"]
 
     #2. TOTAL number of SESSIONS created by the manager
-    query = """SELECT COUNT(*) AS total_sessions
+    query = """
+        SELECT COUNT(*) AS total_sessions
         FROM CLASS_SESSION, COOKING_CLASS
         WHERE CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
-          AND COOKING_CLASS.USER_email = ?
+            AND COOKING_CLASS.USER_email = ?
         """
     cursor.execute(query, (email,))
     stats["total_sessions"] = cursor.fetchone()["total_sessions"]
@@ -74,7 +75,7 @@ def get_manager_stats(email):
           AND CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
           AND COOKING_CLASS.USER_email = ?
           AND BOOKING.status = 'ENROLLED'
-          """
+        """
     cursor.execute(query, (email,))
     stats["total_enrollments"] = cursor.fetchone()["total_enrollments"]
 
@@ -86,7 +87,7 @@ def get_manager_stats(email):
           AND CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
           AND COOKING_CLASS.USER_email = ?
           AND BOOKING.status = 'WAITING'
-          """
+        """
     cursor.execute(query, (email,))
     stats["total_waiting_students"] = cursor.fetchone()["total_waiting_students"]
 

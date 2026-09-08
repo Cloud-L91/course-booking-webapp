@@ -13,9 +13,7 @@ The cake is a lie - Register
             <p>We promise not to let you set the kitchen on fire on your first attempt.</p>
 
             {% if error %}
-            <div class="alert alert-danger py-2 small" role="alert">
-                {{ error }}
-            </div>
+            <div class="alert alert-danger py-2 small" role="alert">{{ error }}</div>
             {% endif %}
 
             <div class="row g-2 mb-3">
@@ -31,33 +29,25 @@ The cake is a lie - Register
 
             <div class="mb-3">
                 <label for="email">E-mail</label>
-                <input class="form-control" type="email" id="email" name="email" placeholder="name@example.com"
-                    required>
+                <input class="form-control" type="email" id="email" name="email" placeholder="name@example.com" required>
             </div>
 
             <div class="row g-3 mb-4">
                 <div class="col-sm-6">
                     <label class="form-label" for="password">Password</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password" placeholder=""
-                            required>
-                        <button type="button" class="btn btn-outline-secondary bg-white" id="togglePassword">
-                            <i class="bi bi-eye" id="togglePasswordIcon"></i>
-                        </button>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="" required>
+                        <button type="button" class="btn btn-outline-secondary bg-white" id="togglePassword"><i class="bi bi-eye" id="togglePasswordIcon"></i></button>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <label class="form-label" for="confirm_password">Confirm password</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
-                            placeholder="" required>
-                        <button type="button" class="btn btn-outline-secondary bg-white" id="toggleConfirmPassword">
-                            <i class="bi bi-eye" id="toggleConfirmPasswordIcon"></i>
-                        </button>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="" required>
+                        <button type="button" class="btn btn-outline-secondary bg-white" id="toggleConfirmPassword"><i class="bi bi-eye" id="toggleConfirmPasswordIcon"></i></button>
                     </div>
                 </div>
             </div>
-
 
             <div class="mb-4">
                 <div class="row g-3">
@@ -68,9 +58,7 @@ The cake is a lie - Register
                                 <i class="bi bi-mortarboard-fill fs-3 text-success me-2"></i>
                                 <span class="fw-bold fs-5 text-success">Student</span>
                             </div>
-                            <p class="text-muted small mb-0 lh-sm">
-                                Attend the classes and improve your skills. Or at least give it a try.
-                            </p>
+                            <p class="text-muted small mb-0 lh-sm">Attend the classes and improve your skills. Or at least give it a try.</p>
                         </label>
                     </div>
 
@@ -81,9 +69,7 @@ The cake is a lie - Register
                                 <i class="bi bi-briefcase-fill fs-3 text-warning me-2"></i>
                                 <span class="fw-bold fs-5 text-warning">Manager</span>
                             </div>
-                            <p class="text-muted small mb-0 lh-sm">
-                                Manage classes and organize sessions.
-                            </p>
+                            <p class="text-muted small mb-0 lh-sm">Manage classes and organize sessions.</p>
                         </label>
                     </div>
                 </div>
@@ -98,12 +84,10 @@ The cake is a lie - Register
             <footer class="border-top mt-4 pt-3 text-center">
                 <p class="mb-0">
                     Are you already part of the brigade?
-                    <a href="{{ url_for('login') }}" class="text-decoration-none">Step into</a>
-                    the kitchen.
+                    <a href="{{ url_for('login') }}" class="text-decoration-none">Step into</a> the kitchen.
                 </p>
             </footer>
         </form>
-
     </div>
 </section>
 {% endblock %}

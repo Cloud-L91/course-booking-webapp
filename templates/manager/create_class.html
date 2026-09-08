@@ -7,9 +7,7 @@ The cake is a lie - Create class
 {% block content %}
 <section class="form-card">
     <div class="register-box register-class">
-        <form class="form-signin w-100 m-auto" method="POST" action="{{ url_for('create_class') }}"
-            enctype="multipart/form-data">
-
+        <form class="form-signin w-100 m-auto" method="POST" action="{{ url_for('create_class') }}" enctype="multipart/form-data">
 
             <div class="col-12 mb-3">
                 <label for="validationDefault01">Title</label>
@@ -23,9 +21,7 @@ The cake is a lie - Create class
                 </div>
                 <div class="col-md-6 mb-3">
                     <label for="chef">Chef</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="chef_name" name="chef_name" required>
-                    </div>
+                    <div class="input-group"><input type="text" class="form-control" id="chef_name" name="chef_name" required></div>
                 </div>
             </div>
 
@@ -59,20 +55,14 @@ The cake is a lie - Create class
                 </div>
             </div>
 
-
-
             <div class="mb-3">
                 <label class="form-label d-block fw-bold">Ingredients</label>
-                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                    data-bs-target="#ingredientsModal">
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#ingredientsModal">
                     <i class="bi bi-list-ul me-1"></i> Add / Edit Ingredients
                 </button>
             </div>
 
-
-
-            <div class="modal fade" id="ingredientsModal" tabindex="-1" aria-labelledby="ingredientsModalLabel"
-                aria-hidden="true">
+            <div class="modal fade" id="ingredientsModal" tabindex="-1" aria-labelledby="ingredientsModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -82,25 +72,18 @@ The cake is a lie - Create class
                         <div class="modal-body">
 
                             <div class="mb-3">
-
                                 <p class="text-muted small mb-2">Write one ingredient per line (minimum 4):</p>
                                 <textarea class="form-control" id="ingredients" name="ingredients" rows="8"></textarea>
                             </div>
 
-
                         </div>
-                        <div class="modal-footer">
-                            <!-- type="button" è fondamentale per non inviare il form in anticipo -->
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
-                        </div>
+                        <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button></div>
                     </div>
                 </div>
             </div>
 
-
             <div class="mt-3">
                 <div class="mb-3">
-
                     <div class="mb-3">
                         <label for="photo_1">First photo</label>
                         <input class="form-control" type="file" id="photo_1" name="photo_1" accept="image/*" required>
@@ -118,9 +101,7 @@ The cake is a lie - Create class
                     <button class="btn btn-secondary py-2" type="reset">Clear</button>
                 </div>
             </div>
-
         </form>
-
     </div>
 </section>
 {% endblock %}

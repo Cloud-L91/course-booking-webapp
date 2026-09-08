@@ -313,7 +313,7 @@ def create_class():
 
         for f in [file_1, file_2, file_3]:
             if f and f.filename:
-                f.save(f"static/img/classes/{f.filename}")
+                f.save(f"static/img/classes/{current_user.email}_{f.filename}")
 
         cooking_class_dao.add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user.email, ingredients)
 

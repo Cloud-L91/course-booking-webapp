@@ -55,7 +55,7 @@ def get_session_rating(session_id):
         SELECT AVG(rating) AS avg_rating
         FROM BOOKING
         WHERE CLASS_SESSION_id = ? AND rating IS NOT NULL
-    """
+        """
     cursor.execute(query, (session_id,))
     result = cursor.fetchone()
 
@@ -101,11 +101,7 @@ def get_ingredients_per_class(cooking_class_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
-    SELECT *
-    FROM INGREDIENT
-    WHERE COOKING_CLASS_id = ?
-    """, (cooking_class_id,))
+    cursor.execute("SELECT * FROM INGREDIENT WHERE COOKING_CLASS_id = ?", (cooking_class_id,))
     
     ingredients = cursor.fetchall()
 
@@ -128,15 +124,16 @@ def get_available_spots(session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    query = """
         SELECT max_capacity - (
             SELECT COUNT(*) 
             FROM BOOKING 
             WHERE CLASS_SESSION_id = CLASS_SESSION.id AND status = 'ENROLLED') AS available_spots
         FROM CLASS_SESSION
         WHERE CLASS_SESSION.id = ?
-        """, (session_id,))
+        """
 
+    cursor.execute(query, (session_id,))
     result = cursor.fetchone()
     utilities_dao.close_connection(conn, cursor)
 
@@ -167,10 +164,12 @@ def add_cooking_class(title, cuisine, duration, difficulty, chef_name, descripti
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    query = """
         INSERT INTO COOKING_CLASS (title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, USER_email)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user_email))
+        """
+
+    cursor.execute(query, (title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user_email))
 
     class_id = cursor.lastrowid
 
@@ -204,7 +203,7 @@ def update_session(session_id, day_of_week, start_time, kitchen, max_capacity):
         UPDATE CLASS_SESSION
         SET day_of_week = ?, start_time = ?, kitchen = ?, max_capacity = ?
         WHERE id = ?
-    """
+        """
     cursor.execute(query, (day_of_week, start_time, kitchen, max_capacity, session_id))
 
     utilities_dao.close_connection(conn, cursor)
