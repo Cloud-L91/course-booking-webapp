@@ -273,7 +273,8 @@ def manager_profile():
 
     all_classes = [dict(c) for c in all_classes]
     for c in all_classes:
-        c["sessions"] = [s for s in session_classes if s["COOKING_CLASS_id"] == c["id"]]
+        rating, _ = cooking_class_dao.get_class_rating(c["id"])
+        c["avg_rating"] = round(rating, 1) if rating else 0
 
     session_classes = [dict(session) for session in session_classes]
     for session in session_classes:
@@ -337,35 +338,32 @@ def add_session():
 
     return redirect(url_for("manager_profile"))
 
-@app.route("/delete_session/<int:session_id>", methods=["POST"])
-@login_required
-def delete_session(session_id):
+@app.route("/session/manage/<int:session_id>", methods=["POST"])
+def manage_session(session_id):
     if current_user.role != "manager":
         return redirect(url_for("home"))
 
     if request.method == "POST":
-        # check if there are people enrolled in the session
-        enrolled_count = booking_dao.check_session_enrollment(session_id)
-        if enrolled_count > 0:
+        action = request.form.get("action")
+
+        enrolled_students = user_dao.get_students_by_session_and_status(session_id, "ENROLLED")
+
+        print(f"DEBUG -> action: '{action}' | enrolled: {len(enrolled_students)} | form_data: {request.form.to_dict()}")
+        if enrolled_students:
+            print("DEBUG -> Bloccato da enrolled_students!")
             return redirect(url_for("manager_profile"))
-        else:
+
+        if action == "delete":
             cooking_class_dao.delete_session(session_id)
+        elif action == "save":
+            day_of_week = request.form.get("day_of_week")
+            start_time = request.form.get("start_time")
+            kitchen = request.form.get("kitchen")
+            max_capacity = request.form.get("max_capacity")
+
+            cooking_class_dao.update_session(session_id, day_of_week, start_time, kitchen, max_capacity)
 
     return redirect(url_for("manager_profile"))
-
-@app.route('/session/edit/<int:session_id>', methods=['POST'])
-@login_required
-def edit_session(session_id):
-    # Recupera i dati del form
-    day = request.form.get('day_of_week')
-    time = request.form.get('start_time')
-    kitchen = request.form.get('kitchen')
-    capacity = request.form.get('max_capacity')
-
-    # Esegui l'UPDATE sul database (assicurati nel DB o nella query che enrolled_count == 0)
-    # db.execute("UPDATE sessions SET day_of_week=?, start_time=?, kitchen=?, max_capacity=? WHERE id=?", (day, time, kitchen, capacity, session_id))
-    
-    return redirect(url_for('manager_profile'))
 
 if __name__ == "__main__":
     app.run(debug=True)

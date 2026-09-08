@@ -195,3 +195,16 @@ def delete_session(session_id):
     cursor.execute("DELETE FROM CLASS_SESSION WHERE id = ?", (session_id,))
 
     utilities_dao.close_connection(conn, cursor)
+
+def update_session(session_id, day_of_week, start_time, kitchen, max_capacity):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        UPDATE CLASS_SESSION
+        SET day_of_week = ?, start_time = ?, kitchen = ?, max_capacity = ?
+        WHERE id = ?
+    """
+    cursor.execute(query, (day_of_week, start_time, kitchen, max_capacity, session_id))
+
+    utilities_dao.close_connection(conn, cursor)
