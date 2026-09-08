@@ -55,6 +55,7 @@ def session_details(session_id):
         max_bookings_reached = (total_enrollments >= utilities_dao.MAX_ENROLLMENTS)
 
     rating, total_votes = cooking_class_dao.get_class_rating(session_class["COOKING_CLASS_id"])
+    rating = round(rating, 1) if rating is not None else 0
 
     has_conflict = False
     if current_user.is_authenticated and current_user.role == "student":
@@ -134,12 +135,10 @@ def register():
             return render_template("authentication/register.html", error="User already exists")
 
         password_hash = generate_password_hash(password)
-        success = user_dao.add_user(first_name, last_name, email, password_hash, role)
+        user_dao.add_user(first_name, last_name, email, password_hash, role)
     
-        if not success:
-            return render_template("authentication/register.html", error="Failed to register user") 
-        else:
-            return redirect(url_for("login"))
+        return redirect(url_for("login"))
+    
     return render_template("authentication/register.html")
 
 @login_manager.user_loader
@@ -271,7 +270,13 @@ def manager_profile():
     session_classes = cooking_class_dao.get_sessions_per_manager(current_user.email)
     all_ingredients = cooking_class_dao.get_all_ingredients()
     stats = user_dao.get_manager_stats(current_user.email)
-   
+
+    session_classes = [dict(session) for session in session_classes]
+    for session in session_classes:
+        session["enrolled_students"] = user_dao.get_students_by_session_and_status(session["id"], "ENROLLED")
+        session["waiting_students"] = user_dao.get_students_by_session_and_status(session["id"], "WAITING")
+        session["avg_rating"] = cooking_class_dao.get_session_rating(session["id"])
+
     return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, all_ingredients=all_ingredients, stats=stats)
 
 @app.route("/create_class", methods=["GET", "POST"])

@@ -30,10 +30,13 @@ def get_sessions_per_manager(manager_email):
 
     query = """
         SELECT CLASS_SESSION.*,
-            (SELECT COUNT(*) FROM BOOKING WHERE BOOKING.CLASS_SESSION_id = CLASS_SESSION.id) AS enrolled_count
-        FROM CLASS_SESSION 
-        JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
-        WHERE COOKING_CLASS.USER_email = ?
+            (SELECT COUNT(*)
+             FROM BOOKING
+             WHERE BOOKING.CLASS_SESSION_id = CLASS_SESSION.id
+               AND BOOKING.status = 'ENROLLED') AS enrolled_count
+        FROM CLASS_SESSION, COOKING_CLASS
+        WHERE COOKING_CLASS.id = CLASS_SESSION.COOKING_CLASS_id
+            AND COOKING_CLASS.USER_email = ?
         """
 
     cursor.execute(query, (manager_email,))
@@ -43,6 +46,24 @@ def get_sessions_per_manager(manager_email):
 
     utilities_dao.close_connection(conn, cursor)
     return sessions
+
+def get_session_rating(session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT AVG(rating) AS avg_rating
+        FROM BOOKING
+        WHERE CLASS_SESSION_id = ? AND rating IS NOT NULL
+    """
+    cursor.execute(query, (session_id,))
+    result = cursor.fetchone()
+
+    utilities_dao.close_connection(conn, cursor)
+
+    if result and result["avg_rating"] is not None:
+        return round(result["avg_rating"], 1)
+    return None
 
 def get_all_sessions():
     conn = utilities_dao.db_connect()

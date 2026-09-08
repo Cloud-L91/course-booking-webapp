@@ -10,4 +10,17 @@
 
 .session-row td {
     height: 48px;
+    cursor: pointer;
+}
+
+.student-list-box {
+    max-height: 180px;
+    overflow-y: auto;
+}
+
+tbody.nav {
+    display: table-row-group;
+}
+.session-row.active {
+    background-color: rgba(0, 0, 0, 0.075);
 }

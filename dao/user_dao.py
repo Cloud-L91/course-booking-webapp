@@ -15,16 +15,28 @@ def add_user(first_name, last_name, email, password_hash, role):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
   
-    try:
-        cursor.execute("INSERT INTO user (first_name, last_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)",
-            (first_name, last_name, email, password_hash, role))
-        success = True
-    except Exception:
-        success = False
-    finally:
-        utilities_dao.close_connection(conn, cursor)
+    cursor.execute("INSERT INTO user (first_name, last_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)",
+        (first_name, last_name, email, password_hash, role))
 
-    return success
+    utilities_dao.close_connection(conn, cursor)
+
+def get_students_by_session_and_status(session_id, status):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM USER, BOOKING
+        WHERE BOOKING.USER_email = USER.email
+            AND USER.role = 'student'
+            AND BOOKING.CLASS_SESSION_id = ? AND BOOKING.status = ?
+    """, (session_id, status))
+
+    students = cursor.fetchall()
+
+    utilities_dao.close_connection(conn, cursor)
+
+    return students
 
 def get_manager_stats(email):
     conn = utilities_dao.db_connect()
