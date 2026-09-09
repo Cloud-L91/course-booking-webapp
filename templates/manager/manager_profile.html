@@ -200,7 +200,6 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                             <span class="badge bg-secondary-subtle text-dark rounded-pill">
                                                 {{ session.enrolled_count }}/{{ session.max_capacity }}
                                             </span>
-
                                         </td>
 
                                         <!-- ELENCO DEGLI ISCRITTI -->
@@ -209,7 +208,6 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                             <ul class="list-unstyled mb-0 student-list-box">
                                                 {% for student in session.enrolled_students %}
                                                 <li>
-                                                    
                                                     - {{ student.first_name }} {{ student.last_name }}
                                                 </li>
                                                 {% endfor %}

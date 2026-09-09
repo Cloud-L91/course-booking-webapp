@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from dao import cooking_class_dao, booking_dao, user_dao, utilities_dao
 from user import User
+import time
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "gli_occhi_del_cuore"
@@ -25,14 +26,12 @@ def load_user(user_id):
         role=db_user["role"]
     )
 
-# Rende il giorno e l'orario simulati disponibili in tutte le pagine
+# GIORNO E ORA ATTUALI VISIBILI IN TUTTI I TEMPLATE
 @app.context_processor
 def inject_current_time():
     return {"current_day": utilities_dao.CURRENT_DAY, "current_time": utilities_dao.CURRENT_TIME}
 
-# --------------------------------------------------------------------------
 # PAGINE PUBBLICHE
-# --------------------------------------------------------------------------
 
 @app.route("/")
 def home():
@@ -43,7 +42,7 @@ def home():
         if utilities_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
             passed_sessions.append(session["id"])
 
-    # Una sola query per sapere a quali sessioni lo studente e' gia' iscritto
+    # UNA SOLA QUERY PER OTTENERE TUTTE LE PRENOTAZIONI DELL'UTENTE LOGGATO
     user_bookings = {}
     if current_user.is_authenticated:
         for booking in booking_dao.get_user_bookings(current_user.email):
@@ -100,9 +99,7 @@ def session_details(session_id):
         max_enrollments=utilities_dao.MAX_ENROLLMENTS
         )
 
-# --------------------------------------------------------------------------
 # AUTENTICAZIONE
-# --------------------------------------------------------------------------
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -154,9 +151,7 @@ def register():
 
     return render_template("authentication/register.html")
 
-# --------------------------------------------------------------------------
 # AZIONI DELLO STUDENTE
-# --------------------------------------------------------------------------
 
 @app.route("/enroll/<int:session_id>", methods=["POST"])
 @login_required
@@ -173,7 +168,7 @@ def enroll(session_id):
     day = session_class["day_of_week"]
     time = session_class["start_time"]
 
-    # Non ci si puo' iscrivere a una sessione gia' iniziata
+    # NO ISCRIZIONI A SESSIONI GIA' IN CORSO O TERMINATE
     if utilities_dao.check_end_of_session(day, time, 0):
         return session_page
 
@@ -182,7 +177,7 @@ def enroll(session_id):
     if available_spots <= 0:
         status = "WAITING"
     else:
-        # Il limite di iscrizioni e la sovrapposizione di orari valgono solo per il posto confermato
+        # SE POSTI DISPONIBILI, MA LO STUDENTE HA GIA' RAGGIUNTO IL LIMITE DI ISCRIZIONI O HA UN CONFLITTO DI ORARIO, NON SI PUO' ISCRIVERE
         if booking_dao.count_user_enrollments(current_user.email) >= utilities_dao.MAX_ENROLLMENTS:
             return session_page
         if booking_dao.check_time_conflict(current_user.email, session_id):
@@ -209,7 +204,7 @@ def delete_booking(session_id):
     day = session_class["day_of_week"]
     time = session_class["start_time"]
 
-    # Una iscrizione confermata si annulla solo fino a 12 ore prima dell'inizio
+    # LIMITE 12H IMPEDISCE LA CANCELLAZIONE
     if user_status == "ENROLLED" and not utilities_dao.check_delete_eligibility(day, time):
         return session_page
 
@@ -229,9 +224,7 @@ def rate_session(session_id):
 
     return redirect(url_for("student_profile"))
 
-# --------------------------------------------------------------------------
 # PROFILI
-# --------------------------------------------------------------------------
 
 @app.route("/profile")
 @login_required
@@ -286,14 +279,14 @@ def manager_profile():
 
     stats = user_dao.get_manager_stats(current_user.email)
 
-    # Sessioni del manager, con gli iscritti e la lista di attesa
+    # LISTE DI STUDENTI ISCRITTI E IN ATTESA PER OGNI SESSIONE DEL MANAGER
     session_classes = [dict(s) for s in cooking_class_dao.get_sessions_per_manager(current_user.email)]
     for session in session_classes:
         session["enrolled_students"] = user_dao.get_students_by_session_and_status(session["id"], "ENROLLED")
         session["waiting_students"] = user_dao.get_students_by_session_and_status(session["id"], "WAITING")
         session["available_spots"] = session["max_capacity"] - session["enrolled_count"]
 
-    # Classi del manager, con i propri ingredienti e le proprie sessioni
+    # CLASSI DEL MANAGER CON RATING, INGREDIENTI, SESSIONI E NUMERO DI STUDENTI IN ATTESA
     all_classes = [dict(c) for c in cooking_class_dao.get_all_classes_per_manager(current_user.email)]
     for cooking_class in all_classes:
         rating, _ = cooking_class_dao.get_class_rating(cooking_class["id"])
@@ -304,9 +297,7 @@ def manager_profile():
 
     return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, stats=stats)
 
-# --------------------------------------------------------------------------
 # AZIONI DEL MANAGER
-# --------------------------------------------------------------------------
 
 @app.route("/create_class", methods=["GET", "POST"])
 @login_required
@@ -329,15 +320,16 @@ def create_class():
         if len(ingredients) < 4:
             return render_template("manager/create_class.html", error="Please insert at least 4 ingredients")
 
-        # Le foto vengono salvate con l'email del manager davanti al nome, cosi' due manager
-        # che caricano file con lo stesso nome non si sovrascrivono a vicenda
+        # FOTO SALVATE CON TIMESTAMP + NOME FILE, PER EVITARE CONFLITTI TRA MANAGER DIVERSI
         photos = []
         for field_name in ["photo_1", "photo_2", "photo_3"]:
             uploaded_file = request.files.get(field_name)
             if not uploaded_file or not uploaded_file.filename:
                 return render_template("manager/create_class.html", error="All three photos are required")
 
-            photo_name = f"{current_user.email}_{uploaded_file.filename}"
+            timestamp = int(time.time())
+            uploaded_file.filename = f"{timestamp}_{uploaded_file.filename}"
+            photo_name = f"{timestamp}_{uploaded_file.filename}"
             uploaded_file.save(f"static/img/classes/{photo_name}")
             photos.append(photo_name)
 
@@ -371,7 +363,7 @@ def manage_session(session_id):
     if current_user.role != "manager":
         return redirect(url_for("home"))
 
-    # Una sessione con studenti iscritti o in lista di attesa non si puo' modificare
+    # SESSIONE CON STUDENTI ISCRITTI O IN ATTESA NON PUO' ESSERE MODIFICATA O ELIMINATA
     enrolled_students = user_dao.get_students_by_session_and_status(session_id, "ENROLLED")
     waiting_students = user_dao.get_students_by_session_and_status(session_id, "WAITING")
 

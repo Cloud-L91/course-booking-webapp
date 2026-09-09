@@ -1,0 +1,105 @@
+diff --git a/static/css/authentication.css b/static/css/authentication.css
+index ba0d122..1fa4af8 100644
+--- a/static/css/authentication.css
++++ b/static/css/authentication.css
+@@ -4,7 +4,6 @@
+     align-items: center;
+     justify-content: center;
+     padding: 0.5rem 1rem;
+-    overflow: hidden;
+ }
+ 
+ .login-box {
+@@ -27,4 +26,14 @@
+ 
+ .register-class {
+     max-width: 800px;
++}
++
++/* Evidenzia il ruolo selezionato nella pagina di registrazione */
++.role-card {
++    border: 2px solid #dee2e6;
++}
++
++.btn-check:checked + .role-card {
++    border-color: #0d6efd;
++    background-color: #f1f6ff;
+ }
+\ No newline at end of file
+diff --git a/static/css/index.css b/static/css/index.css
+index e872d0e..929bb82 100644
+--- a/static/css/index.css
++++ b/static/css/index.css
+@@ -14,19 +14,6 @@
+     height: 200px;
+ }
+ 
+-.detail-thumb-img {
+-    height: 100px;
+-}
+-
+-.detail-main-img {
+-    height: 300px;
+-    aspect-ratio: 1 / 1;
+-}
+-
+-.sticky-sidebar-offset {
+-    top: 6rem;
+-}
+-
+ #sessions-list {
+     scroll-margin-top: 60px;
+ }
+\ No newline at end of file
+diff --git a/static/css/profiles.css b/static/css/profiles.css
+index 055b301..71e8e17 100644
+--- a/static/css/profiles.css
++++ b/static/css/profiles.css
+@@ -4,29 +4,8 @@
+     object-fit: cover;
+ }
+ 
+-/* .class-manager-img-extra {
+-    width: 50px;
+-    height: 85px;
+-    object-fit: cover;
+-} */
+-
+-.badge-classes-mng {
+-    background-color:rgb(5, 131, 87);
+-}
+-
+-.session-row td {
+-    height: 48px;
+-    cursor: pointer;
+-}
+-
++/* Le liste di iscritti e di attesa non devono allungare troppo la riga */
+ .student-list-box {
+-    max-height: 180px;
++    max-height: 140px;
+     overflow-y: auto;
+ }
+-
+-tbody.nav {
+-    display: table-row-group;
+-}
+-.session-row.active {
+-    background-color: rgba(0, 0, 0, 0.075);
+-}
+\ No newline at end of file
+diff --git a/static/css/root.css b/static/css/root.css
+index 89ecaee..4e55770 100644
+--- a/static/css/root.css
++++ b/static/css/root.css
+@@ -12,6 +12,10 @@ body {
+     font-family: Verdana, Geneva, Tahoma, sans-serif;
+ }
+ 
++.site-logo {
++    object-fit: cover;
++}
++
+ .avatar-initials {
+     width: 32px;
+     height: 32px;
