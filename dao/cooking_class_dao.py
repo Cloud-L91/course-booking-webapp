@@ -4,7 +4,7 @@ def get_all_classes_per_manager(manager_email):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM cooking_class WHERE USER_email = ?", (manager_email,))
+    cursor.execute("SELECT * FROM COOKING_CLASS WHERE USER_email = ?", (manager_email,))
 
     cooking_classes = cursor.fetchall()
     cooking_classes.sort(key=lambda c: c["id"], reverse=True)
@@ -12,17 +12,6 @@ def get_all_classes_per_manager(manager_email):
     utilities_dao.close_connection(conn, cursor)
 
     return cooking_classes
-
-def get_single_cooking_class(id):
-    conn = utilities_dao.db_connect()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM cooking_class WHERE id = ?", (id,))
-    cooking_class = cursor.fetchone()
-
-    utilities_dao.close_connection(conn, cursor)
-
-    return cooking_class
 
 def get_sessions_per_manager(manager_email):
     conn = utilities_dao.db_connect()
@@ -47,33 +36,21 @@ def get_sessions_per_manager(manager_email):
     utilities_dao.close_connection(conn, cursor)
     return sessions
 
-def get_session_rating(session_id):
-    conn = utilities_dao.db_connect()
-    cursor = conn.cursor()
-
-    query = """
-        SELECT AVG(rating) AS avg_rating
-        FROM BOOKING
-        WHERE CLASS_SESSION_id = ? AND rating IS NOT NULL
-        """
-    cursor.execute(query, (session_id,))
-    result = cursor.fetchone()
-
-    utilities_dao.close_connection(conn, cursor)
-
-    if result and result["avg_rating"] is not None:
-        return round(result["avg_rating"], 1)
-    return None
-
 def get_all_sessions():
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT * 
-        FROM CLASS_SESSION 
+    query = """
+        SELECT CLASS_SESSION.*, COOKING_CLASS.*,
+            (SELECT COUNT(*)
+             FROM BOOKING
+             WHERE BOOKING.CLASS_SESSION_id = CLASS_SESSION.id
+               AND BOOKING.status = 'ENROLLED') AS enrolled_count
+        FROM CLASS_SESSION
         JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
-        """)
+        """
+
+    cursor.execute(query)
     sessions = cursor.fetchall()
     sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
 
@@ -84,13 +61,14 @@ def get_single_session(session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("""
+    query = """
         SELECT *
         FROM CLASS_SESSION
         JOIN COOKING_CLASS ON CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
         WHERE CLASS_SESSION.id = ?
-        """, (session_id,))
+        """
 
+    cursor.execute(query, (session_id,))
     session = cursor.fetchone()
 
     utilities_dao.close_connection(conn, cursor)
@@ -102,18 +80,6 @@ def get_ingredients_per_class(cooking_class_id):
     cursor = conn.cursor()
 
     cursor.execute("SELECT * FROM INGREDIENT WHERE COOKING_CLASS_id = ?", (cooking_class_id,))
-    
-    ingredients = cursor.fetchall()
-
-    utilities_dao.close_connection(conn, cursor)
-
-    return ingredients
-
-def get_all_ingredients():
-    conn = utilities_dao.db_connect()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT * FROM ingredient")
     ingredients = cursor.fetchall()
 
     utilities_dao.close_connection(conn, cursor)
@@ -137,8 +103,8 @@ def get_available_spots(session_id):
     result = cursor.fetchone()
     utilities_dao.close_connection(conn, cursor)
 
-    if result and result[0] is not None:
-        return int(result[0])
+    if result and result["available_spots"] is not None:
+        return int(result["available_spots"])
     return 0
 
 def get_class_rating(cooking_class_id):
@@ -157,8 +123,8 @@ def get_class_rating(cooking_class_id):
     utilities_dao.close_connection(conn, cursor)
 
     if result and result["average_rating"] is not None:
-        return float(result["average_rating"]), int(result["tot_ratings"])
-    return None, 0
+        return round(float(result["average_rating"]), 1), int(result["tot_ratings"])
+    return 0, 0
 
 def add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user_email, ingredients):
     conn = utilities_dao.db_connect()
@@ -182,16 +148,8 @@ def add_session(cooking_class_id, day_of_week, start_time, kitchen, max_capacity
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    query ="INSERT INTO CLASS_SESSION (COOKING_CLASS_id, day_of_week, start_time, kitchen, max_capacity) VALUES (?, ?, ?, ?, ?)"
+    query = "INSERT INTO CLASS_SESSION (COOKING_CLASS_id, day_of_week, start_time, kitchen, max_capacity) VALUES (?, ?, ?, ?, ?)"
     cursor.execute(query, (cooking_class_id, day_of_week, start_time, kitchen, max_capacity))
-
-    utilities_dao.close_connection(conn, cursor)
-
-def delete_session(session_id):
-    conn = utilities_dao.db_connect()
-    cursor = conn.cursor()
-
-    cursor.execute("DELETE FROM CLASS_SESSION WHERE id = ?", (session_id,))
 
     utilities_dao.close_connection(conn, cursor)
 
@@ -205,5 +163,13 @@ def update_session(session_id, day_of_week, start_time, kitchen, max_capacity):
         WHERE id = ?
         """
     cursor.execute(query, (day_of_week, start_time, kitchen, max_capacity, session_id))
+
+    utilities_dao.close_connection(conn, cursor)
+
+def delete_session(session_id):
+    conn = utilities_dao.db_connect()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM CLASS_SESSION WHERE id = ?", (session_id,))
 
     utilities_dao.close_connection(conn, cursor)

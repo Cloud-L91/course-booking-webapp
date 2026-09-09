@@ -9,8 +9,14 @@ The cake is a lie - Create class
     <div class="register-box register-class">
         <form class="form-signin w-100 m-auto" method="POST" action="{{ url_for('create_class') }}" enctype="multipart/form-data">
 
+            <h1 class="mb-3 fw-normal">New class</h1>
+
+            {% if error %}
+            <div class="alert alert-danger py-2 small" role="alert">{{ error }}</div>
+            {% endif %}
+
             <div class="col-12 mb-3">
-                <label for="validationDefault01">Title</label>
+                <label for="title">Title</label>
                 <input type="text" class="form-control" id="title" name="title" required>
             </div>
 
@@ -20,7 +26,7 @@ The cake is a lie - Create class
                     <input type="text" class="form-control" id="cuisine" name="cuisine" required>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="chef">Chef</label>
+                    <label for="chef_name">Chef</label>
                     <div class="input-group"><input type="text" class="form-control" id="chef_name" name="chef_name" required></div>
                 </div>
             </div>
@@ -49,10 +55,11 @@ The cake is a lie - Create class
                         <option value="Gluten-free">Gluten-free</option>
                     </select>
                 </div>
-                <div class="form-group mt-0">
-                    <label for="description">Description </label>
-                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
             </div>
 
             <div class="mb-3">

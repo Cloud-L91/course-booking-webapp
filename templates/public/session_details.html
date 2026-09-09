@@ -58,7 +58,7 @@ The cake is a lie - {{ session_class.title }}
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item"><strong>Day:</strong> {{ session_class.day_of_week }}</li>
                                 <li class="list-group-item"><strong>Beginning time:</strong> {{ session_class.start_time }}</li>
-                                <li class="list-group-item"><strong>Duration:</strong> {{ session_class.duration }}</li>
+                                <li class="list-group-item"><strong>Duration:</strong> {{ session_class.duration }} min</li>
                                 <li class="list-group-item"><strong>Classroom:</strong> {{ session_class.kitchen }}</li>
                             </ul>
                         </div>
@@ -93,9 +93,17 @@ The cake is a lie - {{ session_class.title }}
 
                     <p class="text-muted small mb-1">Enrolled students</p>
 
-                    <div class="h3 fw-bold text-success mb-2">
+                    <div class="h3 fw-bold text-success mb-1">
                         {{ session_class.max_capacity - available_spots }} <span class="text-muted fs-5 fw-normal"> / {{ session_class.max_capacity }}</span>
                     </div>
+
+                    <p class="small mb-3">
+                        {% if available_spots > 0 %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">{{ available_spots }} spots still available</span>
+                        {% else %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">No spots available</span>
+                        {% endif %}
+                    </p>
 
                     <!-- UTENTE ANONIMO -->
 
@@ -194,8 +202,8 @@ The cake is a lie - {{ session_class.title }}
 
                             {% if available_spots > 0 %}
                                 {% if max_bookings_reached %}
-                                <button class="btn btn-secondary w-100 py-2 fw-semibold mb-2" disabled>Booking limit reached (4/4)</button>
-                                <p class="text-muted small mb-3">You have already booked the maximum allowed of 4 active sessions.</p>
+                                <button class="btn btn-secondary w-100 py-2 fw-semibold mb-2" disabled>Booking limit reached ({{ max_enrollments }}/{{ max_enrollments }})</button>
+                                <p class="text-muted small mb-3">You have already booked the maximum allowed of {{ max_enrollments }} active sessions.</p>
                                 {% else%}
 
                                     {% if has_conflict %}
@@ -222,20 +230,30 @@ The cake is a lie - {{ session_class.title }}
                             {% endif %}
                         {% endif %}
 
+                    <!-- UTENTE MANAGER -->
+
                     {% elif current_user.role == 'manager' %}
-
-                    <!-- SEZIONE DEL MANAGER DA FARE!!!! -->
-
+                    <div class="alert alert-info d-flex align-items-center mb-3 py-2" role="alert">
+                        <i class="bi bi-briefcase-fill me-2 fs-5"></i>
+                        <p class="mb-0">You are viewing this page as a manager, so you cannot enrol.</p>
+                    </div>
+                    <a href="{{ url_for('manager_profile') }}" class="btn btn-outline-primary w-100 py-2 fw-semibold">
+                        Manage my classes
+                    </a>
                     {% endif %}
+
+                    <!-- Le regole di cancellazione riguardano solo gli studenti -->
+                    {% if not current_user.is_authenticated or current_user.role == 'student' %}
                     <hr class="my-4">
 
-                    <div class="card text-bg-light p-4 mt-4">
+                    <div class="card text-bg-light p-4">
                         <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2 text-primary"></i>Cancellation rules</h6>
                         <p class="small mb-0">
                             You can cancel your registration up to 12 hours before the session begins.
                             After this time, cancellation will no longer be possible.
                         </p>
                     </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

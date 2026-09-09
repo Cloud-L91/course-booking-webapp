@@ -1,6 +1,5 @@
 import sqlite3
 import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 CURRENT_DAY = "Wednesday"
@@ -13,6 +12,7 @@ DATABASE = "database/project3_database.db"
 def db_connect():
     conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 def close_connection(conn, cursor):

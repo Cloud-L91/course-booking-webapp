@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from dao import cooking_class_dao, booking_dao, user_dao, utilities_dao
@@ -12,6 +12,28 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+@login_manager.user_loader
+def load_user(user_id):
+    db_user = user_dao.get_user_by_email(user_id)
+    if not db_user:
+        return None
+    return User(
+        email=db_user["email"],
+        first_name=db_user["first_name"],
+        last_name=db_user["last_name"],
+        password=db_user["password_hash"],
+        role=db_user["role"]
+    )
+
+# Rende il giorno e l'orario simulati disponibili in tutte le pagine
+@app.context_processor
+def inject_current_time():
+    return {"current_day": utilities_dao.CURRENT_DAY, "current_time": utilities_dao.CURRENT_TIME}
+
+# --------------------------------------------------------------------------
+# PAGINE PUBBLICHE
+# --------------------------------------------------------------------------
+
 @app.route("/")
 def home():
     session_classes = cooking_class_dao.get_all_sessions()
@@ -21,26 +43,31 @@ def home():
         if utilities_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"]):
             passed_sessions.append(session["id"])
 
+    # Una sola query per sapere a quali sessioni lo studente e' gia' iscritto
     user_bookings = {}
     if current_user.is_authenticated:
-        for session in session_classes:
-            status = booking_dao.check_existing_booking(current_user.email, session["id"])
-            if status:
-                user_bookings[session["id"]] = status
+        for booking in booking_dao.get_user_bookings(current_user.email):
+            user_bookings[booking["CLASS_SESSION_id"]] = booking["status"]
 
     return render_template("public/index.html", session_classes=session_classes, user_bookings=user_bookings, passed_sessions=passed_sessions)
 
 @app.route("/session_details/<int:session_id>")
 def session_details(session_id):
     session_class = cooking_class_dao.get_single_session(session_id)
+    if not session_class:
+        return redirect(url_for("home"))
+
     ingredients = cooking_class_dao.get_ingredients_per_class(session_class["COOKING_CLASS_id"])
     available_spots = cooking_class_dao.get_available_spots(session_id)
-    name_manager = user_dao.get_user_by_email(session_class["USER_email"])
-    name_manager = f"{name_manager['first_name']} {name_manager['last_name']}"
+    rating, total_votes = cooking_class_dao.get_class_rating(session_class["COOKING_CLASS_id"])
+
+    manager = user_dao.get_user_by_email(session_class["USER_email"])
+    name_manager = f"{manager['first_name']} {manager['last_name']}"
 
     day = session_class["day_of_week"]
     time = session_class["start_time"]
     duration = session_class["duration"]
+
     deletable = utilities_dao.check_delete_eligibility(day, time)
     passed_session = utilities_dao.check_end_of_session(day, time, duration)
     session_started = utilities_dao.check_end_of_session(day, time, 0)
@@ -48,17 +75,11 @@ def session_details(session_id):
 
     user_status = None
     max_bookings_reached = False
+    has_conflict = False
 
     if current_user.is_authenticated and current_user.role == "student":
         user_status = booking_dao.check_existing_booking(current_user.email, session_id)
-        total_enrollments = booking_dao.count_user_enrollments(current_user.email)
-        max_bookings_reached = (total_enrollments >= utilities_dao.MAX_ENROLLMENTS)
-
-    rating, total_votes = cooking_class_dao.get_class_rating(session_class["COOKING_CLASS_id"])
-    rating = round(rating, 1) if rating is not None else 0
-
-    has_conflict = False
-    if current_user.is_authenticated and current_user.role == "student":
+        max_bookings_reached = booking_dao.count_user_enrollments(current_user.email) >= utilities_dao.MAX_ENROLLMENTS
         has_conflict = booking_dao.check_time_conflict(current_user.email, session_id)
 
     return render_template(
@@ -75,35 +96,30 @@ def session_details(session_id):
         deletable=deletable,
         session_in_progress=session_in_progress,
         has_conflict=has_conflict,
-        name_manager=name_manager
+        name_manager=name_manager,
+        max_enrollments=utilities_dao.MAX_ENROLLMENTS
         )
+
+# --------------------------------------------------------------------------
+# AUTENTICAZIONE
+# --------------------------------------------------------------------------
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        form_user = request.form.to_dict()
-        email = form_user.get("email")
-        password = form_user.get("password")
+        email = request.form.get("email")
+        password = request.form.get("password")
 
         db_user = user_dao.get_user_by_email(email)
 
         if not db_user:
-            print("The user does not exist")
             return render_template("authentication/login.html", error="User not found")
-        elif not check_password_hash(db_user["password_hash"], password):
-            print("The password is incorrect")
+
+        if not check_password_hash(db_user["password_hash"], password):
             return render_template("authentication/login.html", error="Incorrect password")
-        else:
-            logged_in_user = User(
-                email=db_user["email"],
-                first_name=db_user["first_name"],
-                last_name=db_user["last_name"],
-                password=db_user["password_hash"],
-                role=db_user["role"]
-            )
-            result = login_user(logged_in_user)
-            print(result)
-            return redirect(url_for("home"))
+
+        login_user(load_user(email))
+        return redirect(url_for("home"))
 
     return render_template("authentication/login.html")
 
@@ -116,13 +132,12 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        form_data = request.form.to_dict()
-        first_name = form_data.get("first_name")
-        last_name = form_data.get("last_name")
-        email = form_data.get("email")
-        password = form_data.get("password")
-        confirm_password = form_data.get("confirm_password")
-        role = form_data.get("role")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+        role = request.form.get("role")
 
         if not all([first_name, last_name, email, password, confirm_password, role]):
             return render_template("authentication/register.html", error="All fields are required")
@@ -130,92 +145,82 @@ def register():
         if password != confirm_password:
             return render_template("authentication/register.html", error="Passwords do not match")
 
-        existing_user = user_dao.get_user_by_email(email)
-        if existing_user:
+        if user_dao.get_user_by_email(email):
             return render_template("authentication/register.html", error="User already exists")
 
-        password_hash = generate_password_hash(password)
-        user_dao.add_user(first_name, last_name, email, password_hash, role)
-    
+        user_dao.add_user(first_name, last_name, email, generate_password_hash(password), role)
+
         return redirect(url_for("login"))
-    
+
     return render_template("authentication/register.html")
 
-@login_manager.user_loader
-def load_user(user_id):
-    db_user = user_dao.get_user_by_email(user_id)
-    if not db_user:
-        return None
-    return User(
-        email=db_user["email"],
-        first_name=db_user["first_name"],
-        last_name=db_user["last_name"],
-        password=db_user["password_hash"],
-        role=db_user["role"]
-    )
+# --------------------------------------------------------------------------
+# AZIONI DELLO STUDENTE
+# --------------------------------------------------------------------------
 
 @app.route("/enroll/<int:session_id>", methods=["POST"])
 @login_required
 def enroll(session_id):
-    if request.method == "POST":
-        if current_user.role != "student":
-            return redirect(url_for("session_details", session_id=session_id))
+    session_page = redirect(url_for("session_details", session_id=session_id))
 
-        if booking_dao.check_existing_booking(current_user.email, session_id):
-            return redirect(url_for("session_details", session_id=session_id))
+    if current_user.role != "student":
+        return session_page
 
-        session_class = cooking_class_dao.get_single_session(session_id)
-        day = session_class["day_of_week"]
-        time = session_class["start_time"]
-        if utilities_dao.check_end_of_session(day, time, 0):
-            return redirect(url_for("session_details", session_id=session_id))
+    if booking_dao.check_existing_booking(current_user.email, session_id):
+        return session_page
 
-        total_enrollments = booking_dao.count_user_enrollments(current_user.email)
-        available_spots = cooking_class_dao.get_available_spots(session_id)
+    session_class = cooking_class_dao.get_single_session(session_id)
+    day = session_class["day_of_week"]
+    time = session_class["start_time"]
 
-        if available_spots <= 0:
-            status = "WAITING"
-        elif total_enrollments >= utilities_dao.MAX_ENROLLMENTS:
-            return redirect(url_for("session_details", session_id=session_id))
-        else:
-            status = "ENROLLED"
+    # Non ci si puo' iscrivere a una sessione gia' iniziata
+    if utilities_dao.check_end_of_session(day, time, 0):
+        return session_page
 
-        if status == "ENROLLED" and booking_dao.check_time_conflict(current_user.email, session_id):
-            return redirect(url_for("session_details", session_id=session_id))
+    available_spots = cooking_class_dao.get_available_spots(session_id)
 
-        booking_dao.enroll_user_in_session(status, session_id, current_user.email)
+    if available_spots <= 0:
+        status = "WAITING"
+    else:
+        # Il limite di iscrizioni e la sovrapposizione di orari valgono solo per il posto confermato
+        if booking_dao.count_user_enrollments(current_user.email) >= utilities_dao.MAX_ENROLLMENTS:
+            return session_page
+        if booking_dao.check_time_conflict(current_user.email, session_id):
+            return session_page
+        status = "ENROLLED"
 
-    return redirect(url_for("session_details", session_id=session_id))
+    booking_dao.enroll_user_in_session(status, session_id, current_user.email)
+
+    return session_page
 
 @app.route("/delete_booking/<int:session_id>", methods=["POST"])
 @login_required
 def delete_booking(session_id):
-    if request.method == "POST":
-        if current_user.role != "student":
-            return redirect(url_for("session_details", session_id=session_id))
+    session_page = redirect(url_for("session_details", session_id=session_id))
 
-        session_class = cooking_class_dao.get_single_session(session_id)
-        day = session_class["day_of_week"]
-        time = session_class["start_time"]
+    if current_user.role != "student":
+        return session_page
 
-        user_status = booking_dao.check_existing_booking(current_user.email, session_id)
-        if not user_status:
-            return redirect(url_for("session_details", session_id=session_id))
+    user_status = booking_dao.check_existing_booking(current_user.email, session_id)
+    if not user_status:
+        return session_page
 
-        if user_status == "ENROLLED" and not utilities_dao.check_delete_eligibility(day, time):
-            return redirect(url_for("session_details", session_id=session_id))
+    session_class = cooking_class_dao.get_single_session(session_id)
+    day = session_class["day_of_week"]
+    time = session_class["start_time"]
 
-        booking_dao.delete_booking(current_user.email, session_id)
-    
-    return redirect(url_for("session_details", session_id=session_id))
+    # Una iscrizione confermata si annulla solo fino a 12 ore prima dell'inizio
+    if user_status == "ENROLLED" and not utilities_dao.check_delete_eligibility(day, time):
+        return session_page
+
+    booking_dao.delete_booking(current_user.email, session_id)
+
+    return session_page
 
 @app.route("/rate_session/<int:session_id>", methods=["POST"])
 @login_required
 def rate_session(session_id):
-    if request.method == "POST":
-        if current_user.role != "student":
-            return redirect(url_for("session_details", session_id=session_id))
-
+    if current_user.role == "student":
         rating = request.form.get("rating", type=int)
         current_rating = booking_dao.get_user_rating(current_user.email, session_id)
 
@@ -223,6 +228,10 @@ def rate_session(session_id):
             booking_dao.set_user_rating(current_user.email, session_id, rating)
 
     return redirect(url_for("student_profile"))
+
+# --------------------------------------------------------------------------
+# PROFILI
+# --------------------------------------------------------------------------
 
 @app.route("/profile")
 @login_required
@@ -237,6 +246,9 @@ def profile():
 @app.route("/student_profile")
 @login_required
 def student_profile():
+    if current_user.role != "student":
+        return redirect(url_for("home"))
+
     all_sessions = booking_dao.get_user_enrolled_sessions(current_user.email)
     all_sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
 
@@ -245,44 +257,56 @@ def student_profile():
     on_waiting_list = []
 
     for session in all_sessions:
-        day = session["day_of_week"]
-        time = session["start_time"]
-        duration = session["duration"]
-        ended = utilities_dao.check_end_of_session(day, time, duration)
+        session = dict(session)
+        ended = utilities_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"])
 
         if session["status"] == "WAITING":
             if not ended:
-                session = dict(session)
-                session["waiting_position"] = booking_dao.get_waiting_list_positions(current_user.email, session["id"])   
+                session["waiting_position"] = booking_dao.get_waiting_list_positions(current_user.email, session["id"])
                 on_waiting_list.append(session)
+        elif ended:
+            past_sessions.append(session)
         else:
-            if ended:
-                past_sessions.append(session)
-            else:
-                upcoming_sessions.append(session)
+            session["deletable"] = utilities_dao.check_delete_eligibility(session["day_of_week"], session["start_time"])
+            upcoming_sessions.append(session)
 
-    return render_template("student/student_profile.html", upcoming_sessions=upcoming_sessions, past_sessions=past_sessions, on_waiting_list=on_waiting_list)
+    return render_template(
+        "student/student_profile.html",
+        upcoming_sessions=upcoming_sessions,
+        past_sessions=past_sessions,
+        on_waiting_list=on_waiting_list,
+        max_enrollments=utilities_dao.MAX_ENROLLMENTS
+        )
 
 @app.route("/manager_profile")
 @login_required
 def manager_profile():
-    all_classes = cooking_class_dao.get_all_classes_per_manager(current_user.email)
-    session_classes = cooking_class_dao.get_sessions_per_manager(current_user.email)
-    all_ingredients = cooking_class_dao.get_all_ingredients()
+    if current_user.role != "manager":
+        return redirect(url_for("home"))
+
     stats = user_dao.get_manager_stats(current_user.email)
 
-    all_classes = [dict(c) for c in all_classes]
-    for c in all_classes:
-        rating, _ = cooking_class_dao.get_class_rating(c["id"])
-        c["avg_rating"] = round(rating, 1) if rating else 0
-
-    session_classes = [dict(session) for session in session_classes]
+    # Sessioni del manager, con gli iscritti e la lista di attesa
+    session_classes = [dict(s) for s in cooking_class_dao.get_sessions_per_manager(current_user.email)]
     for session in session_classes:
         session["enrolled_students"] = user_dao.get_students_by_session_and_status(session["id"], "ENROLLED")
         session["waiting_students"] = user_dao.get_students_by_session_and_status(session["id"], "WAITING")
-        session["avg_rating"] = cooking_class_dao.get_session_rating(session["id"])
+        session["available_spots"] = session["max_capacity"] - session["enrolled_count"]
 
-    return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, all_ingredients=all_ingredients, stats=stats)
+    # Classi del manager, con i propri ingredienti e le proprie sessioni
+    all_classes = [dict(c) for c in cooking_class_dao.get_all_classes_per_manager(current_user.email)]
+    for cooking_class in all_classes:
+        rating, _ = cooking_class_dao.get_class_rating(cooking_class["id"])
+        cooking_class["avg_rating"] = rating
+        cooking_class["ingredients"] = cooking_class_dao.get_ingredients_per_class(cooking_class["id"])
+        cooking_class["sessions"] = [s for s in session_classes if s["COOKING_CLASS_id"] == cooking_class["id"]]
+        cooking_class["waiting_total"] = sum(len(s["waiting_students"]) for s in cooking_class["sessions"])
+
+    return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, stats=stats)
+
+# --------------------------------------------------------------------------
+# AZIONI DEL MANAGER
+# --------------------------------------------------------------------------
 
 @app.route("/create_class", methods=["GET", "POST"])
 @login_required
@@ -291,7 +315,6 @@ def create_class():
         return redirect(url_for("home"))
 
     if request.method == "POST":
-        
         title = request.form.get("title")
         cuisine = request.form.get("cuisine")
         duration = request.form.get("duration", type=int)
@@ -299,69 +322,73 @@ def create_class():
         chef_name = request.form.get("chef_name")
         description = request.form.get("description")
         dietary_category = request.form.get("dietary_category")
-        raw_ingredients = request.form.get("ingredients","")
+        raw_ingredients = request.form.get("ingredients", "")
 
         ingredients = [ingredient.strip() for ingredient in raw_ingredients.splitlines() if ingredient.strip()]
 
-        file_1 = request.files.get("photo_1")
-        file_2 = request.files.get("photo_2")
-        file_3 = request.files.get("photo_3")
+        if len(ingredients) < 4:
+            return render_template("manager/create_class.html", error="Please insert at least 4 ingredients")
 
-        photo_1 = file_1.filename if file_1 else None
-        photo_2 = file_2.filename if file_2 else None
-        photo_3 = file_3.filename if file_3 else None
+        # Le foto vengono salvate con l'email del manager davanti al nome, cosi' due manager
+        # che caricano file con lo stesso nome non si sovrascrivono a vicenda
+        photos = []
+        for field_name in ["photo_1", "photo_2", "photo_3"]:
+            uploaded_file = request.files.get(field_name)
+            if not uploaded_file or not uploaded_file.filename:
+                return render_template("manager/create_class.html", error="All three photos are required")
 
-        for f in [file_1, file_2, file_3]:
-            if f and f.filename:
-                f.save(f"static/img/classes/{current_user.email}_{f.filename}")
+            photo_name = f"{current_user.email}_{uploaded_file.filename}"
+            uploaded_file.save(f"static/img/classes/{photo_name}")
+            photos.append(photo_name)
 
-        cooking_class_dao.add_cooking_class(title, cuisine, duration, difficulty, chef_name, description, dietary_category, photo_1, photo_2, photo_3, current_user.email, ingredients)
+        cooking_class_dao.add_cooking_class(title, cuisine, duration, difficulty, chef_name, description,
+                                            dietary_category, photos[0], photos[1], photos[2],
+                                            current_user.email, ingredients)
 
         return redirect(url_for("manager_profile"))
 
-    return render_template("/manager/create_class.html")
+    return render_template("manager/create_class.html")
 
-@app.route("/add_session", methods=["GET", "POST"])
+@app.route("/add_session", methods=["POST"])
 @login_required
 def add_session():
     if current_user.role != "manager":
         return redirect(url_for("home"))
 
-    if request.method == "POST":
-        cooking_class_id = request.form.get("cooking_class_id")
+    cooking_class_id = request.form.get("cooking_class_id")
+    day_of_week = request.form.get("day_of_week")
+    start_time = request.form.get("start_time")
+    kitchen = request.form.get("kitchen")
+    max_capacity = request.form.get("max_capacity")
+
+    cooking_class_dao.add_session(cooking_class_id, day_of_week, start_time, kitchen, max_capacity)
+
+    return redirect(url_for("manager_profile"))
+
+@app.route("/session/manage/<int:session_id>", methods=["POST"])
+@login_required
+def manage_session(session_id):
+    if current_user.role != "manager":
+        return redirect(url_for("home"))
+
+    # Una sessione con studenti iscritti o in lista di attesa non si puo' modificare
+    enrolled_students = user_dao.get_students_by_session_and_status(session_id, "ENROLLED")
+    waiting_students = user_dao.get_students_by_session_and_status(session_id, "WAITING")
+
+    if enrolled_students or waiting_students:
+        return redirect(url_for("manager_profile"))
+
+    action = request.form.get("action")
+
+    if action == "delete":
+        cooking_class_dao.delete_session(session_id)
+    elif action == "save":
         day_of_week = request.form.get("day_of_week")
         start_time = request.form.get("start_time")
         kitchen = request.form.get("kitchen")
         max_capacity = request.form.get("max_capacity")
 
-        cooking_class_dao.add_session(cooking_class_id, day_of_week, start_time, kitchen, max_capacity)
-
-    return redirect(url_for("manager_profile"))
-
-@app.route("/session/manage/<int:session_id>", methods=["POST"])
-def manage_session(session_id):
-    if current_user.role != "manager":
-        return redirect(url_for("home"))
-
-    if request.method == "POST":
-        action = request.form.get("action")
-
-        enrolled_students = user_dao.get_students_by_session_and_status(session_id, "ENROLLED")
-
-        print(f"DEBUG -> action: '{action}' | enrolled: {len(enrolled_students)} | form_data: {request.form.to_dict()}")
-        if enrolled_students:
-            print("DEBUG -> Bloccato da enrolled_students!")
-            return redirect(url_for("manager_profile"))
-
-        if action == "delete":
-            cooking_class_dao.delete_session(session_id)
-        elif action == "save":
-            day_of_week = request.form.get("day_of_week")
-            start_time = request.form.get("start_time")
-            kitchen = request.form.get("kitchen")
-            max_capacity = request.form.get("max_capacity")
-
-            cooking_class_dao.update_session(session_id, day_of_week, start_time, kitchen, max_capacity)
+        cooking_class_dao.update_session(session_id, day_of_week, start_time, kitchen, max_capacity)
 
     return redirect(url_for("manager_profile"))
 

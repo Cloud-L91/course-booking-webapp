@@ -30,6 +30,7 @@ def get_students_by_session_and_status(session_id, status):
         WHERE BOOKING.USER_email = USER.email
             AND USER.role = 'student'
             AND BOOKING.CLASS_SESSION_id = ? AND BOOKING.status = ?
+        ORDER BY BOOKING.id ASC
         """
 
     cursor.execute(query, (session_id, status))

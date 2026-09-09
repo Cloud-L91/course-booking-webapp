@@ -1,0 +1,12 @@
+.detail-main-img {
+    height: 300px;
+    aspect-ratio: 1 / 1;
+}
+
+.detail-thumb-img {
+    height: 100px;
+}
+
+.sticky-sidebar-offset {
+    top: 6rem;
+}
