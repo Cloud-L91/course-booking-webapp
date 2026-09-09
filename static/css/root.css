@@ -12,6 +12,10 @@ body {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
+.site-logo {
+    object-fit: cover;
+}
+
 .avatar-initials {
     width: 32px;
     height: 32px;

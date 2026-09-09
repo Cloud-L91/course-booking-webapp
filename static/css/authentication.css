@@ -4,7 +4,6 @@
     align-items: center;
     justify-content: center;
     padding: 0.5rem 1rem;
-    overflow: hidden;
 }
 
 .login-box {
@@ -27,4 +26,14 @@
 
 .register-class {
     max-width: 800px;
+}
+
+/* Evidenzia il ruolo selezionato nella pagina di registrazione */
+.role-card {
+    border: 2px solid #dee2e6;
+}
+
+.btn-check:checked + .role-card {
+    border-color: #0d6efd;
+    background-color: #f1f6ff;
 }
