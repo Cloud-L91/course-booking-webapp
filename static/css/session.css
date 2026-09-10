@@ -8,5 +8,26 @@
 }
 
 .sticky-sidebar-offset {
-    top: 6rem;
+    top: 7.8rem;
+}
+
+.session-spots {
+    color: #084318
+}
+
+.spots-badge {
+    background-color: #55E07E;
+    color: #084318;
+    border: 1px solid #3ac966;
+}
+
+.container .card:not(.text-bg-light) {
+    background-color: #FFFDF0;
+    border: 1px solid rgba(255, 157, 80, 0.25);
+    border-radius: 12px;
+}
+
+.card .list-group-item {
+    background-color: transparent !important;
+    border-color: rgba(255, 157, 80, 0.15) !important;
 }

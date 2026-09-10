@@ -14,19 +14,21 @@
     height: 200px;
 }
 
-.detail-thumb-img {
-    height: 100px;
-}
-
-.detail-main-img {
-    height: 300px;
-    aspect-ratio: 1 / 1;
-}
-
-.sticky-sidebar-offset {
-    top: 6rem;
-}
-
 #sessions-list {
     scroll-margin-top: 60px;
+}
+
+#sessions-list .card {
+    background-color: #fffdf3;
+    border: 1px solid #f0d8bd;
+    border-radius: 5px;
+}
+
+#sessions-list .card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+#sessions-list .card-footer {
+    background-color: #fff9e8;
+    border-top: 1px solid #f0d8bd;
 }

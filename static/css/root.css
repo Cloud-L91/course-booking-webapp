@@ -1,4 +1,10 @@
-/* Stile globale della barra di scorrimento della pagina */
+/* VARIABILI COLORI */
+:root {
+    --brand-orange: #FF9D50;
+    --brand-cream: #FFF9D8;
+    --brand-turquoise: #1DCED8;
+    --brand-green: #55E07E;
+}
 
 html {
     scrollbar-width: thin;
@@ -6,7 +12,9 @@ html {
     scroll-behavior: smooth;
 }
 
+/* SFONDO PRINCIPALE */
 body {
+    background-color: var(--brand-cream);
     padding-top: 60px;
     overflow-x: hidden;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -21,4 +29,38 @@ body {
     height: 32px;
     font-size: 0.75rem;
     font-weight: 600;
+}
+
+/* BOTTONI PRINCIPALI */
+.btn-primary {
+    background-color: var(--brand-orange);
+    border-color: var(--brand-orange);
+    color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #e68537;
+    border-color: #e68537;
+} */
+
+/* BADGE */
+.badge-booked,
+.badge.bg-success {
+    background-color: var(--brand-green) !important;
+    color: #084318;
+}
+
+/* Header / Navbar */
+.header,
+.app-header {
+    background-color: #2B2520 !important;
+    color: #FFF9D8 !important;
+}
+
+/* Footer */
+footer,
+.app-footer {
+    background-color: #2B2520 !important;
+    color: #FFF9D8 !important;
 }

@@ -11,45 +11,46 @@ The cake is a lie - {{ session_class.title }}
             <a href="{{ url_for('home')}}" class="text-dark text-decoration-none d-inline-block mb-3">
                 <i class="bi bi-arrow-left"></i> Back to classes
             </a>
-            <div class="row">
-                <div class="col-md-6">
-                    <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_1) }}"
-                        class="rounded w-100 mb-2 object-fit-cover detail-main-img">
-                    <div class="row">
-                        <div class="col-6">
-                            <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_2) }}"
-                                class="rounded w-100 object-fit-cover detail-thumb-img">
-                        </div>
-                        <div class="col-6">
-                            <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_3) }}"
-                                class="rounded w-100 object-fit-cover detail-thumb-img">
+            <div class="card p-3 p-md-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_1) }}"
+                            class="rounded w-100 mb-2 object-fit-cover detail-main-img">
+                        <div class="row">
+                            <div class="col-6">
+                                <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_2) }}"
+                                    class="rounded w-100 object-fit-cover detail-thumb-img">
+                            </div>
+                            <div class="col-6">
+                                <img src="{{ url_for('static', filename='img/classes/' ~ session_class.photo_3) }}"
+                                    class="rounded w-100 object-fit-cover detail-thumb-img">
+                            </div>
                         </div>
                     </div>
-                </div>
 
 
-                <div class="col-md-6">
-                    <h3 class="fw-bold">{{ session_class.title }}</h3>
+                    <div class="col-md-6">
+                        <h3 class="fw-bold">{{ session_class.title }}</h3>
 
-                    <!-- STELLINE -->
+                        <!-- STELLINE -->
 
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="text-warning me-2">
-                            {% for i in range(1, 6) %}
-                            <i class="bi bi-star{{ '-fill' if rating >= i else '' }}"></i>
-                            {% endfor %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="text-warning me-2">
+                                {% for i in range(1, 6) %}
+                                <i class="bi bi-star{{ '-fill' if rating >= i else '' }}"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="fw-bold text-dark me-1">{{ "%.1f"|format(rating) }}</span>
+                            <span class="text-muted small">({{ total_votes }} votes)</span>
+
                         </div>
-                        <span class="fw-bold text-dark me-1">{{ "%.1f"|format(rating) }}</span>
-                        <span class="text-muted small">({{ total_votes }} votes)</span>
 
+                        <p class="small fw-semibold text-muted">Created by {{ name_manager }}</p>
+
+                        <p class="text-secondary">{{ session_class.description }}</p>
                     </div>
-
-                    <p class="small fw-semibold text-muted">Created by {{ name_manager }}</p>
-
-                    <p class="text-secondary">{{ session_class.description }}</p>
                 </div>
             </div>
-
             <div class="mt-5">
                 <h4 class="fw-bold mb-4">Details</h4>
                 <div class="card overflow-hidden">
@@ -93,13 +94,13 @@ The cake is a lie - {{ session_class.title }}
 
                     <p class="text-muted small mb-1">Enrolled students</p>
 
-                    <div class="h3 fw-bold text-success mb-1">
+                    <div class="h3 fw-bold session-spots mb-1">
                         {{ session_class.max_capacity - available_spots }} <span class="text-muted fs-5 fw-normal"> / {{ session_class.max_capacity }}</span>
                     </div>
 
                     <p class="small mb-3">
                         {% if available_spots > 0 %}
-                        <span class="badge bg-success-subtle text-success border border-success-subtle">{{ available_spots }} spots still available</span>
+                        <span class="badge spots-badge">{{ available_spots }} spots still available</span>
                         {% else %}
                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle">No spots available</span>
                         {% endif %}
