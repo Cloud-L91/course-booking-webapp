@@ -31,7 +31,7 @@
                 </ul>
 
                 <!-- GIORNO ED ORA ATTUALI -->
-                <span class="badge bg-secondary me-3">
+                <span class="badge fs-6 me-3">
                     <i class="bi bi-clock me-1"></i> {{ current_day }}, {{ current_time }}
                 </span>
 
@@ -44,7 +44,7 @@
                             class="d-inline-flex align-items-center text-white text-decoration-none dropdown-toggle"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <span class="me-2 small">Hi, {{ current_user.first_name }}</span>
-                            <span class="avatar-initials bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center me-1">
+                            <span class="avatar-initials btn-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center me-1">
                                 {{ current_user.first_name[0] }}{{ current_user.last_name[0] }}
                             </span>
                         </a>

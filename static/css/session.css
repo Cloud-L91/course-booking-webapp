@@ -16,13 +16,21 @@
 }
 
 .spots-badge {
-    background-color: #55E07E;
-    color: #084318;
-    border: 1px solid #3ac966;
+    padding: 7px;
+    font-size: 12px;
+}
+
+.spots-badge.free{
+    background-color: #29743e;
+}
+.spots-badge.full{
+    background-color: #edbbbb;
+    color: #c13b3b;
+    border: 1px solid #ca5f5f;
 }
 
 .container .card:not(.text-bg-light) {
-    background-color: #FFFDF0;
+    background-color: var(--brand-card);
     border: 1px solid rgba(255, 157, 80, 0.25);
     border-radius: 12px;
 }
@@ -30,4 +38,9 @@
 .card .list-group-item {
     background-color: transparent !important;
     border-color: rgba(255, 157, 80, 0.15) !important;
+}
+
+.joe-star {
+    color: #fce345;
+    -webkit-text-stroke: 1px #a78770;
 }

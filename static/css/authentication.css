@@ -9,8 +9,8 @@
 .login-box {
     width: 100%;
     max-width: 480px;
-    background-color: #ffffff;
-    border: 2px solid #000000;
+    background-color: var(--brand-auth);
+    border: 2px solid var(--brand-border);
     border-radius: 1rem;
     padding: 3rem 2.5rem;
 }
@@ -18,8 +18,8 @@
 .register-box {
     width: 100%;
     max-width: 680px;
-    background-color: #ffffff;
-    border: 2px solid #000000;
+    background-color: var(--brand-auth);
+    border: 2px solid var(--brand-border);
     border-radius: 1rem;
     padding: 1.5rem 2rem;
 }
@@ -28,12 +28,16 @@
     max-width: 800px;
 }
 
-/* Evidenzia il ruolo selezionato nella pagina di registrazione */
+/* RUOLO EVIDENZIATO */
 .role-card {
-    border: 2px solid #dee2e6;
+    border: 2px solid #e6e3de;
+}
+
+.role-manager {
+    color: var(--brand-orange);
 }
 
 .btn-check:checked + .role-card {
-    border-color: #0d6efd;
-    background-color: #f1f6ff;
+    border-color: var(--brand-border);
+    background-color: #fff9f1;
 }

@@ -1,20 +1,28 @@
 /* VARIABILI COLORI */
 :root {
-    --brand-orange: #FF9D50;
-    --brand-cream: #FFF9D8;
-    --brand-turquoise: #1DCED8;
+    --brand-peach: #FFBE91;
+    --brand-cream: #FFDDB0;
+    --brand-turquoise: #CFEBFF;
+    --brand-vanilla: #FFFCE1;
     --brand-green: #55E07E;
+    --dark-warm: #2B2520;
+    --brand-bg: #F8F0E5;
+    --brand-card: #e8dccc;
+    --brand-auth: #e9e2d7;
+    --brand-footer: #EADBC8;
+    --brand-border: #dbb68b;
+    --brand-orange: #EB7F31;
 }
 
 html {
     scrollbar-width: thin;
-    scrollbar-color: #0072FA #212529;
+    scrollbar-color: var(--brand-cream) var(--dark-warm);
     scroll-behavior: smooth;
 }
 
 /* SFONDO PRINCIPALE */
 body {
-    background-color: var(--brand-cream);
+    background-color: var(--brand-bg);
     padding-top: 60px;
     overflow-x: hidden;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -33,16 +41,21 @@ body {
 
 /* BOTTONI PRINCIPALI */
 .btn-primary {
-    background-color: var(--brand-orange);
-    border-color: var(--brand-orange);
+    background-color: var(--brand-peach);
+    border-color: var(--brand-peach);
     color: #ffffff;
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-    background-color: #e68537;
-    border-color: #e68537;
-} */
+    background-color: #f3ae80 !important;
+    border-color: #f3ae80 !important;
+    color: #2b1404 !important;
+}
+
+.btn-info {
+    background-color: var(--brand-turquoise);
+}
 
 /* BADGE */
 .badge-booked,
@@ -51,16 +64,9 @@ body {
     color: #084318;
 }
 
-/* Header / Navbar */
-.header,
-.app-header {
-    background-color: #2B2520 !important;
-    color: #FFF9D8 !important;
-}
-
-/* Footer */
-footer,
+/* HEADER / FOOTER */
+.app-header,
 .app-footer {
-    background-color: #2B2520 !important;
-    color: #FFF9D8 !important;
+    background-color: var(--dark-warm) !important;
+    color: var(--brand-vanilla) !important;
 }
