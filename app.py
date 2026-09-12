@@ -138,7 +138,7 @@ def register():
         if not all([first_name, last_name, email, password, confirm_password, role]):
             return render_template("authentication/register.html", error="All fields are required")
 
-        if not (2 <= len(first_name) <= 30) or not (2 <= len(last_name) <= 30):
+        if not (2 <= len(first_name) <= 50) or not (2 <= len(last_name) <= 50):
             return render_template("authentication/register.html", error="First and last name must be between 2 and 30 characters")
 
         if not (5 <= len(email) <= 50):
@@ -182,17 +182,14 @@ def enroll(session_id):
 
     available_spots = cooking_class_dao.get_available_spots(session_id)
 
-    if available_spots <= 0:
-        status = "WAITING"
-    else:
+    if available_spots > 0:
         # SE POSTI DISPONIBILI, MA LO STUDENTE HA GIA' RAGGIUNTO IL LIMITE DI ISCRIZIONI O HA UN CONFLITTO DI ORARIO, NON SI PUO' ISCRIVERE
         if booking_dao.count_user_enrollments(current_user.email) >= utilities_dao.MAX_ENROLLMENTS:
             return session_page
         if booking_dao.check_time_conflict(current_user.email, session_id):
             return session_page
-        status = "ENROLLED"
 
-    booking_dao.enroll_user_in_session(status, session_id, current_user.email)
+    booking_dao.enroll_user_in_session(session_id, current_user.email)
 
     return session_page
 
@@ -343,22 +340,22 @@ def create_class():
         if len(description) > 500:
             return render_template("manager/create_class.html", error="Description cannot exceed 500 characters")
 
-        if dietary_category not in ["Standard", "Vegetarian", "Vegan", "Gluten-Free"]:
+        if dietary_category not in ["Standard", "Vegetarian", "Vegan", "Gluten-free"]:
             return render_template("manager/create_class.html", error="Invalid dietary category")
 
         if len(ingredients) < 4:
             return render_template("manager/create_class.html", error="Please insert at least 4 ingredients")
 
-        # FOTO SALVATE CON TIMESTAMP + NOME FILE, PER EVITARE CONFLITTI TRA MANAGER DIVERSI
+        # FOTO SALVATE CON NOME MANAGER + TIMESTAMP + NUMERO FOTO + NOME FILE, PER EVITARE CONFLITTI TRA MANAGER DIVERSI
+        timestamp = int(time.time())
         photos = []
-        for field_name in ["photo_1", "photo_2", "photo_3"]:
-            uploaded_file = request.files.get(field_name)
+
+        for num in [1, 2, 3]:
+            uploaded_file = request.files.get(f"photo_{num}")
             if not uploaded_file or not uploaded_file.filename:
                 return render_template("manager/create_class.html", error="All three photos are required")
 
-            timestamp = int(time.time())
-            uploaded_file.filename = f"{timestamp}_{uploaded_file.filename}"
-            photo_name = f"{timestamp}_{uploaded_file.filename}"
+            photo_name = f"{current_user.email}_{timestamp}_{num}_{uploaded_file.filename}"
             uploaded_file.save(f"static/img/classes/{photo_name}")
             photos.append(photo_name)
 
