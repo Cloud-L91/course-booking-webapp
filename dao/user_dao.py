@@ -4,7 +4,7 @@ def get_user_by_email(email):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM user WHERE email = ?", (email,))
+    cursor.execute("SELECT * FROM USER WHERE email = ?", (email,))
     user = cursor.fetchone()
 
     utilities_dao.close_connection(conn, cursor)
@@ -15,7 +15,7 @@ def add_user(first_name, last_name, email, password_hash, role):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
   
-    cursor.execute("INSERT INTO user (first_name, last_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)",
+    cursor.execute("INSERT INTO USER (first_name, last_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)",
         (first_name, last_name, email, password_hash, role))
 
     utilities_dao.close_connection(conn, cursor)

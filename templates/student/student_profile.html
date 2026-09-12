@@ -44,7 +44,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                 </li>
             </ul>
 
-            <div class="tab-content border p-3">
+            <div class="tab-content p-3">
 
                 <!-- PRENOTATI -->
                 <div id="booked" class="tab-pane fade show active">
@@ -52,11 +52,11 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                     <div class="row row-cols-1 row-cols-md-2 g-4">
                         {% for upcoming in upcoming_sessions %}
                         <div class="col">
-                            <div class="card h-100">
+                            <div class="card booking-card h-100">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <h5 class="card-title fw-bold mb-0">{{ upcoming.title }}</h5>
-                                        <span class="badge bg-success">Booked</span>
+                                        
                                     </div>
 
                                     <p class="card-text mb-3">{{ upcoming.cuisine }} &bull; Chef {{ upcoming.chef_name }}</p>
@@ -90,38 +90,40 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                 <!-- IN ATTESA -->
                 <div id="waiting" class="tab-pane fade">
                     {% if on_waiting_list %}
-                    <table class="table table-hover caption-top">
-                        <thead class="table-secondary">
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Class</th>
-                                <th scope="col">Day/Time</th>
-                                <th scope="col">Duration</th>
-                                <th scope="col">Kitchen</th>
-                                <th scope="col" class="text-center">Position in list</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for waiting in on_waiting_list %}
-                            <tr class="align-middle">
-                                <th scope="row">{{ loop.index }}</th>
-                                <td>
-                                    <a href="{{ url_for('session_details', session_id=waiting.id) }}" class="text-dark">
-                                        <strong>{{ waiting.title }}</strong>
-                                    </a>
-                                    <br>
-                                    <small class="text-muted">{{ waiting.cuisine }} &bull; Chef {{ waiting.chef_name }}</small>
-                                </td>
-                                <td>{{ waiting.day_of_week }} at {{ waiting.start_time }}</td>
-                                <td>{{ waiting.duration }} min</td>
-                                <td>{{ waiting.kitchen }}</td>
-                                <td class="text-center">
-                                    <span class="badge rounded-pill bg-warning text-dark px-3 py-1">#{{ waiting.waiting_position }}</span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table align-middle profile-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Class</th>
+                                    <th scope="col">Day/Time</th>
+                                    <th scope="col">Duration</th>
+                                    <th scope="col">Kitchen</th>
+                                    <th scope="col" class="text-center">Position in list</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for waiting in on_waiting_list %}
+                                <tr class="align-middle">
+                                    <th scope="row">{{ loop.index }}</th>
+                                    <td>
+                                        <a href="{{ url_for('session_details', session_id=waiting.id) }}" class="text-dark">
+                                            <strong>{{ waiting.title }}</strong>
+                                        </a>
+                                        <br>
+                                        <small class="text-muted">{{ waiting.cuisine }} &bull; Chef {{ waiting.chef_name }}</small>
+                                    </td>
+                                    <td>{{ waiting.day_of_week }} at {{ waiting.start_time }}</td>
+                                    <td>{{ waiting.duration }} min</td>
+                                    <td>{{ waiting.kitchen }}</td>
+                                    <td class="text-center">
+                                        <span class="badge rounded-pill bg-warning text-dark px-3 py-1">#{{ waiting.waiting_position }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% else %}
                     <div class="text-center py-5 text-muted"><p class="mb-0">You are not on any waiting list.</p></div>
                     {% endif %}
@@ -130,52 +132,54 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                 <!-- PASSATE -->
                 <div id="passed" class="tab-pane fade">
                     {% if past_sessions %}
-                    <table class="table table-hover caption-top">
-                        <thead class="table-secondary">
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Class</th>
-                                <th scope="col">Day/Time</th>
-                                <th scope="col">Duration</th>
-                                <th scope="col">Kitchen</th>
-                                <th scope="col">Rating</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for passed in past_sessions %}
-                            <tr class="align-middle">
-                                <th scope="row">{{ loop.index }}</th>
-                                <td>
-                                    <a href="{{ url_for('session_details', session_id=passed.id) }}" class="text-dark">
-                                        <strong>{{ passed.title }}</strong>
-                                    </a>
-                                    <br>
-                                    <small class="text-muted">{{ passed.cuisine }} &bull; Chef {{ passed.chef_name }}</small>
-                                </td>
-                                <td>{{ passed.day_of_week }} at {{ passed.start_time }}</td>
-                                <td>{{ passed.duration }} min</td>
-                                <td>{{ passed.kitchen }}</td>
-                                {% if passed.rating %}
-                                <td>{{ passed.rating }}/5 <i class="bi bi-star-fill text-warning"></i></td>
-                                {% else %}
-                                <td>
-                                    <form action="{{ url_for('rate_session', session_id=passed.id) }}" method="POST" class="d-flex gap-1 align-items-center">
-                                        <select name="rating" class="form-select form-select-sm w-auto" required>
-                                            <option value="" disabled selected>-</option>
-                                            <option value="5">5 &#9733;</option>
-                                            <option value="4">4 &#9733;</option>
-                                            <option value="3">3 &#9733;</option>
-                                            <option value="2">2 &#9733;</option>
-                                            <option value="1">1 &#9733;</option>
-                                        </select>
-                                        <button type="submit" class="btn btn-outline-success btn-sm">Send</button>
-                                    </form>
-                                </td>
-                                {% endif %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table align-middle profile-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Class</th>
+                                    <th scope="col">Day/Time</th>
+                                    <th scope="col">Duration</th>
+                                    <th scope="col">Kitchen</th>
+                                    <th scope="col">Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for passed in past_sessions %}
+                                <tr class="align-middle">
+                                    <th scope="row">{{ loop.index }}</th>
+                                    <td>
+                                        <a href="{{ url_for('session_details', session_id=passed.id) }}" class="text-dark">
+                                            <strong>{{ passed.title }}</strong>
+                                        </a>
+                                        <br>
+                                        <small class="text-muted">{{ passed.cuisine }} &bull; Chef {{ passed.chef_name }}</small>
+                                    </td>
+                                    <td>{{ passed.day_of_week }} at {{ passed.start_time }}</td>
+                                    <td>{{ passed.duration }} min</td>
+                                    <td>{{ passed.kitchen }}</td>
+                                    {% if passed.rating %}
+                                    <td>{{ passed.rating }}/5 <i class="bi bi-star-fill joe-star text-warning"></i></td>
+                                    {% else %}
+                                    <td>
+                                        <form action="{{ url_for('rate_session', session_id=passed.id) }}" method="POST" class="d-flex gap-1 align-items-center">
+                                            <select name="rating" class="form-select form-select-sm w-auto" required>
+                                                <option value="" disabled selected>-</option>
+                                                <option value="5">5 &#9733;</option>
+                                                <option value="4">4 &#9733;</option>
+                                                <option value="3">3 &#9733;</option>
+                                                <option value="2">2 &#9733;</option>
+                                                <option value="1">1 &#9733;</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-outline-success btn-sm">Send</button>
+                                        </form>
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div> 
                     {% else %}
                     <div class="text-center py-5 text-muted"><p class="mb-0">You haven't attended any session yet.</p></div>
                     {% endif %}

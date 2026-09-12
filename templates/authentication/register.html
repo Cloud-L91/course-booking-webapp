@@ -19,31 +19,31 @@ The cake is a lie - Register
             <div class="row g-2 mb-3">
                 <div class="col-sm-6">
                     <label class="form-label mb-1" for="first_name">First name</label>
-                    <input class="form-control" type="text" id="first_name" name="first_name" placeholder="" required>
+                    <input class="form-control" type="text" id="first_name" name="first_name" minlength="2" maxlength="50" required>
                 </div>
                 <div class="col-sm-6">
                     <label class="form-label mb-1" for="last_name">Last name</label>
-                    <input class="form-control" type="text" id="last_name" name="last_name" placeholder="" required>
+                    <input class="form-control" type="text" id="last_name" name="last_name" placeholder="" minlength="2" maxlength="50" required>
                 </div>
             </div>
 
             <div class="mb-3">
                 <label for="email">E-mail</label>
-                <input class="form-control" type="email" id="email" name="email" placeholder="name@example.com" required>
+                <input class="form-control" type="email" id="email" name="email" placeholder="name@example.com" maxlength="100" required>
             </div>
 
             <div class="row g-3 mb-4">
                 <div class="col-sm-6">
                     <label class="form-label" for="password">Password</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password" placeholder="" required>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="" minlength="6" maxlength="50" required>
                         <button type="button" class="btn btn-outline-secondary bg-white" id="togglePassword"><i class="bi bi-eye" id="togglePasswordIcon"></i></button>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <label class="form-label" for="confirm_password">Confirm password</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="" required>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="" minlength="6" maxlength="50" required>
                         <button type="button" class="btn btn-outline-secondary bg-white" id="toggleConfirmPassword"><i class="bi bi-eye" id="toggleConfirmPasswordIcon"></i></button>
                     </div>
                 </div>

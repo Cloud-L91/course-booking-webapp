@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, flash, render_template, request, redirect, url_for
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -32,7 +32,6 @@ def inject_current_time():
     return {"current_day": utilities_dao.CURRENT_DAY, "current_time": utilities_dao.CURRENT_TIME}
 
 # PAGINE PUBBLICHE
-
 @app.route("/")
 def home():
     session_classes = cooking_class_dao.get_all_sessions()
@@ -139,6 +138,15 @@ def register():
         if not all([first_name, last_name, email, password, confirm_password, role]):
             return render_template("authentication/register.html", error="All fields are required")
 
+        if not (2 <= len(first_name) <= 30) or not (2 <= len(last_name) <= 30):
+            return render_template("authentication/register.html", error="First and last name must be between 2 and 30 characters")
+
+        if not (5 <= len(email) <= 50):
+            return render_template("authentication/register.html", error="Email must be between 5 and 50 characters")
+
+        if not (6 <= len(password) <= 30):
+            return render_template("authentication/register.html", error="Password must be between 6 and 30 characters")
+
         if password != confirm_password:
             return render_template("authentication/register.html", error="Passwords do not match")
 
@@ -146,7 +154,7 @@ def register():
             return render_template("authentication/register.html", error="User already exists")
 
         user_dao.add_user(first_name, last_name, email, generate_password_hash(password), role)
-
+        flash("Account created!", "success")
         return redirect(url_for("login"))
 
     return render_template("authentication/register.html")
@@ -298,7 +306,6 @@ def manager_profile():
     return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, stats=stats)
 
 # AZIONI DEL MANAGER
-
 @app.route("/create_class", methods=["GET", "POST"])
 @login_required
 def create_class():
@@ -316,6 +323,28 @@ def create_class():
         raw_ingredients = request.form.get("ingredients", "")
 
         ingredients = [ingredient.strip() for ingredient in raw_ingredients.splitlines() if ingredient.strip()]
+
+        # CONTROLLI BACK-END
+        if not 2 <= len(title) <= 30:
+            return render_template("manager/create_class.html", error="Title must be between 2 and 50 characters")
+
+        if not 2 <= len(cuisine) <= 30:
+            return render_template("manager/create_class.html", error="Cuisine must be between 2 and 50 characters")
+
+        if not 30 <= duration <= 240:
+            return render_template("manager/create_class.html", error="Duration must be between 30 and 240 minutes")
+
+        if difficulty not in ["Beginner", "Intermediate", "Advanced"]:
+            return render_template("manager/create_class.html", error="Invalid difficulty level")
+
+        if not 2 <= len(chef_name) <= 30:
+            return render_template("manager/create_class.html", error="Chef name must be between 2 and 50 characters")
+
+        if len(description) > 500:
+            return render_template("manager/create_class.html", error="Description cannot exceed 500 characters")
+
+        if dietary_category not in ["Standard", "Vegetarian", "Vegan", "Gluten-Free"]:
+            return render_template("manager/create_class.html", error="Invalid dietary category")
 
         if len(ingredients) < 4:
             return render_template("manager/create_class.html", error="Please insert at least 4 ingredients")

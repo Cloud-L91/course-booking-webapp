@@ -4,13 +4,21 @@
     object-fit: cover;
 }
 
-/* Le liste di iscritti e di attesa non devono allungare troppo la riga */
 .student-list-box {
     max-height: 140px;
     overflow-y: auto;
 }
 
+.register-box {
+    padding: 1rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
 
+.card-body {
+    background-color: var(--brand-card);
+    border-radius: 10px;
+}
 
 /* CARD AVVISO LIMITE */
 .card.stat-card {
@@ -38,43 +46,26 @@
     border-color: var(--brand-border) var(--brand-border) var(--brand-card);
 }
 
-/* Contenitore dei tab */
-.profile-tab-content {
-    background-color: var(--brand-card);
-    border: 1px solid var(--brand-border);
-    border-top: none;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
 
-/* Card interne alle prenotazioni */
+/* CARD PRENOTATI MANAGER */
 .booking-card {
-    background-color: var(--brand-bg);
-    border: 1px solid var(--brand-border);
-    border-radius: 8px;
+    background-color: var(--brand-bg) !important;
+    border: 1px solid var(--brand-border) !important;
+    border-radius: 8px !important;
 }
 
-/* Tabelle e header pastello */
-.profile-table {
-    background-color: transparent;
-}
-
+/* TABELLE ATTESA/PASSATI MANAGER */
 .profile-table thead th {
     background-color: var(--brand-cream);
-    color: var(--dark-warm);
-    border-bottom: 1px solid var(--brand-border);
-    font-size: 0.85rem;
-    padding: 0.75rem;
 }
 
 .profile-table tbody td, 
 .profile-table tbody th {
-    background-color: transparent;
+    background-color: var(--brand-bg);
     border-bottom: 1px solid var(--brand-border);
-    padding: 0.75rem;
 }
 
-/* Badge personalizzati per lista d'attesa e passati */
+/* BADGE ATTESA/PASSATI MANAGER */
 .badge-waiting {
     background-color: var(--brand-peach) !important;
     color: #4a2810 !important;
@@ -83,4 +74,117 @@
 .badge-passed {
     background-color: var(--brand-turquoise) !important;
     color: #1a425b !important;
+}
+
+/* ACCORDION MANAGER */
+/* STATO CHIUSO */
+.accordion-button.collapsed {
+    background-color: #f0e9dd !important;
+    color: var(--dark-warm) !important;
+}
+
+/* BORDO DIVISORIO */
+.accordion-item {
+    border-color: var(--brand-border) !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--brand-card) !important;
+    color: var(--dark-warm) !important;
+    box-shadow: none !important;
+    outline: none;
+}
+
+/* BORDO AZZURRINO MANAGER */
+.accordion-button:focus,
+.accordion-button:active {
+    box-shadow: none !important;
+    outline: none !important;
+    border-color: transparent !important;
+}
+
+.accordion-box {
+    background-color: var(--brand-bg);
+    border: 1px solid var(--brand-border) !important;
+    border-radius: 8px;
+}
+
+/* SFONDO APERTO */
+.accordion-body {
+    background-color: var(--brand-card);
+}
+
+/* DETTAGLI INTERNI */
+.accordion-table {
+    background-color: var(--brand-bg) !important;
+    border: 1px solid var(--brand-border) !important;
+}
+
+.accordion-body .btn-primary {
+    color: #4a2810 !important;
+    font-weight: 600;
+}
+
+.badge-ingredient {
+    background-color: var(--brand-turquoise) !important;
+    color: #1a425b !important;
+    border: 1px solid rgba(207, 235, 255, 0.6);
+}
+
+/* BADGE POSTI */
+.seats-pill {
+    background-color: var(--brand-cream) !important;
+    color: #4a2810 !important;
+    border: 1px solid var(--brand-border);
+    font-weight: 600;
+}
+
+/* TABELLA SESSIONI MANAGER */
+.session-table-wrapper {
+    border: 1px solid var(--brand-border);
+    background-color: var(--brand-bg);
+}
+
+.session-table-wrapper .profile-table thead th {
+    background-color: var(--brand-cream);
+    color: var(--dark-warm);
+    border-bottom: 1px solid var(--brand-border);
+}
+
+.session-table-wrapper .profile-table tbody td {
+    border-bottom: 1px solid rgba(219, 182, 139, 0.4);
+}
+
+/* MODALS MANAGER */
+.app-modal {
+    background-color: var(--brand-bg);
+    border: 1px solid var(--brand-border) !important;
+    border-radius: 10px;
+}
+
+.app-modal .modal-header,
+.app-modal .modal-footer {
+    border-color: var(--brand-border);
+}
+
+.app-modal .form-control,
+.app-modal .form-select {
+    border-color: var(--brand-border);
+    background-color: #ffffff;
+}
+
+/* BADGE DIFFICOLTà MANAGER */
+.badge-diff-beginner {
+    background-color: var(--brand-turquoise) !important;
+    color: #1a425b !important;
+}
+
+.badge-diff-intermediate {
+    background-color: var(--brand-cream) !important;
+    color: #4a2810 !important;
+}
+
+.badge-diff-advanced {
+    background-color: var(--brand-peach) !important;
+    color: #4a2810 !important;
 }
