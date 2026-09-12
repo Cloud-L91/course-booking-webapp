@@ -30,8 +30,7 @@ def get_sessions_per_manager(manager_email):
 
     cursor.execute(query, (manager_email,))
     sessions = cursor.fetchall()
-
-    sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
+    sessions = utilities_dao.sort_sessions_chronologically(sessions)
 
     utilities_dao.close_connection(conn, cursor)
     return sessions
@@ -52,7 +51,7 @@ def get_all_sessions():
 
     cursor.execute(query)
     sessions = cursor.fetchall()
-    sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
+    sessions = utilities_dao.sort_sessions_chronologically(sessions)
 
     utilities_dao.close_connection(conn, cursor)
     return sessions

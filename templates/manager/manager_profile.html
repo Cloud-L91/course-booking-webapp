@@ -274,9 +274,8 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
-                <form action="{{ url_for('add_session') }}" method="POST">
+                <form action="{{ url_for('add_session', class_id=classes.id) }}" method="POST">
                     <div class="modal-body py-3">
-                        <input type="hidden" name="cooking_class_id" value="{{ classes.id }}">
                         <div class="row g-2">
                             <div class="col-6">
                                 <label class="form-label small fw-semibold mb-1">Day</label>

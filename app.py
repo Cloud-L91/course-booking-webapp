@@ -139,7 +139,7 @@ def register():
             return render_template("authentication/register.html", error="All fields are required")
 
         if not (2 <= len(first_name) <= 50) or not (2 <= len(last_name) <= 50):
-            return render_template("authentication/register.html", error="First and last name must be between 2 and 30 characters")
+            return render_template("authentication/register.html", error="First and last name must be between 2 and 50 characters")
 
         if not (5 <= len(email) <= 50):
             return render_template("authentication/register.html", error="Email must be between 5 and 50 characters")
@@ -164,46 +164,55 @@ def register():
 @app.route("/enroll/<int:session_id>", methods=["POST"])
 @login_required
 def enroll(session_id):
-    session_page = redirect(url_for("session_details", session_id=session_id))
-
     if current_user.role != "student":
-        return session_page
+        return redirect(url_for("session_details", session_id=session_id))
 
     if booking_dao.check_existing_booking(current_user.email, session_id):
-        return session_page
+        flash("You are already registered for this session.", "info")
+        return redirect(url_for("session_details", session_id=session_id))
 
     session_class = cooking_class_dao.get_single_session(session_id)
+    if not session_class:
+        flash("Session not found.", "danger")
+        return redirect(url_for("home"))
+
     day = session_class["day_of_week"]
     time = session_class["start_time"]
 
     # NO ISCRIZIONI A SESSIONI GIA' IN CORSO O TERMINATE
     if utilities_dao.check_end_of_session(day, time, 0):
-        return session_page
+        flash("You cannot register for this session.", "warning")
+        return redirect(url_for("session_details", session_id=session_id))
 
     available_spots = cooking_class_dao.get_available_spots(session_id)
 
     if available_spots > 0:
         # SE POSTI DISPONIBILI, MA LO STUDENTE HA GIA' RAGGIUNTO IL LIMITE DI ISCRIZIONI O HA UN CONFLITTO DI ORARIO, NON SI PUO' ISCRIVERE
         if booking_dao.count_user_enrollments(current_user.email) >= utilities_dao.MAX_ENROLLMENTS:
-            return session_page
+            flash("You have reached the maximum number of enrollments.", "warning")
+            return redirect(url_for("session_details", session_id=session_id))
         if booking_dao.check_time_conflict(current_user.email, session_id):
-            return session_page
+            flash("You have a time conflict with another session.", "warning")
+            return redirect(url_for("session_details", session_id=session_id))
 
     booking_dao.enroll_user_in_session(session_id, current_user.email)
 
-    return session_page
+    if available_spots > 0:
+        flash("Successfully enrolled in the session!", "success")
+    else:
+        flash("Class is full: you have been added to the waiting list.", "warning")
+
+    return redirect(url_for("session_details", session_id=session_id))
 
 @app.route("/delete_booking/<int:session_id>", methods=["POST"])
 @login_required
 def delete_booking(session_id):
-    session_page = redirect(url_for("session_details", session_id=session_id))
-
     if current_user.role != "student":
-        return session_page
+        return redirect(url_for("session_details", session_id=session_id))
 
     user_status = booking_dao.check_existing_booking(current_user.email, session_id)
     if not user_status:
-        return session_page
+        return redirect(url_for("session_details", session_id=session_id))
 
     session_class = cooking_class_dao.get_single_session(session_id)
     day = session_class["day_of_week"]
@@ -211,21 +220,31 @@ def delete_booking(session_id):
 
     # LIMITE 12H IMPEDISCE LA CANCELLAZIONE
     if user_status == "ENROLLED" and not utilities_dao.check_delete_eligibility(day, time):
-        return session_page
+        flash("You cannot delete your enrollment less than 12 hours before the session.", "warning")
+        return redirect(url_for("session_details", session_id=session_id))
 
     booking_dao.delete_booking(current_user.email, session_id)
+    flash("Booking deleted successfully.", "success")
 
-    return session_page
+    return redirect(url_for("session_details", session_id=session_id))
 
 @app.route("/rate_session/<int:session_id>", methods=["POST"])
 @login_required
 def rate_session(session_id):
     if current_user.role == "student":
+
+        # LO STUDENTE VALUTA SOLO A SESSIONE TERMINATA
+        session_class = cooking_class_dao.get_single_session(session_id)
+        if not utilities_dao.check_end_of_session(session_class["day_of_week"], session_class["start_time"], session_class["duration"]):
+            flash("You can only rate sessions that have ended.", "warning")
+            return redirect(url_for("student_profile"))
+
         rating = request.form.get("rating", type=int)
         current_rating = booking_dao.get_user_rating(current_user.email, session_id)
 
         if current_rating is None and rating and 1 <= rating <= 5:
             booking_dao.set_user_rating(current_user.email, session_id, rating)
+            flash("Rating submitted successfully! Thank you for your feedback!", "success")
 
     return redirect(url_for("student_profile"))
 
@@ -248,7 +267,7 @@ def student_profile():
         return redirect(url_for("home"))
 
     all_sessions = booking_dao.get_user_enrolled_sessions(current_user.email)
-    all_sessions.sort(key=lambda s: (utilities_dao.DAYS.index(s["day_of_week"]), s["start_time"]))
+    all_sessions = utilities_dao.sort_sessions_chronologically(all_sessions)
 
     upcoming_sessions = []
     past_sessions = []
@@ -323,10 +342,10 @@ def create_class():
 
         # CONTROLLI BACK-END
         if not 2 <= len(title) <= 30:
-            return render_template("manager/create_class.html", error="Title must be between 2 and 50 characters")
+            return render_template("manager/create_class.html", error="Title must be between 2 and 30 characters")
 
         if not 2 <= len(cuisine) <= 30:
-            return render_template("manager/create_class.html", error="Cuisine must be between 2 and 50 characters")
+            return render_template("manager/create_class.html", error="Cuisine must be between 2 and 30 characters")
 
         if not 30 <= duration <= 240:
             return render_template("manager/create_class.html", error="Duration must be between 30 and 240 minutes")
@@ -335,7 +354,7 @@ def create_class():
             return render_template("manager/create_class.html", error="Invalid difficulty level")
 
         if not 2 <= len(chef_name) <= 30:
-            return render_template("manager/create_class.html", error="Chef name must be between 2 and 50 characters")
+            return render_template("manager/create_class.html", error="Chef name must be between 2 and 30 characters")
 
         if len(description) > 500:
             return render_template("manager/create_class.html", error="Description cannot exceed 500 characters")
@@ -363,24 +382,51 @@ def create_class():
                                             dietary_category, photos[0], photos[1], photos[2],
                                             current_user.email, ingredients)
 
+        flash("Cooking class created successfully!", "success")
         return redirect(url_for("manager_profile"))
 
     return render_template("manager/create_class.html")
 
-@app.route("/add_session", methods=["POST"])
+@app.route("/add_session/<int:class_id>", methods=["POST"])
 @login_required
-def add_session():
+def add_session(class_id):
     if current_user.role != "manager":
         return redirect(url_for("home"))
 
-    cooking_class_id = request.form.get("cooking_class_id")
+    # CONTROLLO L'ID PROVENIENTE DAL MODAL CHE APPARTENGA AL MANAGER LOGGATO
+    manager_classes = [c["id"] for c in cooking_class_dao.get_all_classes_per_manager(current_user.email)]
+    if int(class_id) not in manager_classes:
+        flash("Unauthorized class access.", "danger")
+        return redirect(url_for("manager_profile"))
+    
     day_of_week = request.form.get("day_of_week")
     start_time = request.form.get("start_time")
     kitchen = request.form.get("kitchen")
-    max_capacity = request.form.get("max_capacity")
+    max_capacity = request.form.get("max_capacity", type=int)
+    
+    if day_of_week not in utilities_dao.DAYS:
+        flash("Invalid day of the week.", "danger")
+        return redirect(url_for("manager_profile"))
 
-    cooking_class_dao.add_session(cooking_class_id, day_of_week, start_time, kitchen, max_capacity)
+    # È SITO DI CUCINA, NON IL TARDIS
+    if utilities_dao.check_end_of_session(day_of_week, start_time, 0):
+        flash("Cannot schedule a session in the past.", "danger")
+        return redirect(url_for("manager_profile"))
 
+    if not utilities_dao.validate_time_format(start_time):
+        flash("Invalid time format. Please use HH:MM format.", "danger")
+        return redirect(url_for("manager_profile"))
+
+    if not (2 < len(kitchen) < 30):
+        flash("Kitchen name must be between 2 and 30 characters.", "danger")
+        return redirect(url_for("manager_profile"))
+    
+    if not max_capacity or not (1 <= int(max_capacity) <= 10):
+        flash("Max capacity must be between 1 and 10", "danger")
+        return redirect(url_for("manager_profile"))
+
+    cooking_class_dao.add_session(class_id, day_of_week, start_time, kitchen, max_capacity)
+    flash("Session added successfully!", "success")
     return redirect(url_for("manager_profile"))
 
 @app.route("/session/manage/<int:session_id>", methods=["POST"])
@@ -399,14 +445,38 @@ def manage_session(session_id):
     action = request.form.get("action")
 
     if action == "delete":
+        flash("Session deleted successfully!", "success")
         cooking_class_dao.delete_session(session_id)
+        
     elif action == "save":
         day_of_week = request.form.get("day_of_week")
         start_time = request.form.get("start_time")
         kitchen = request.form.get("kitchen")
-        max_capacity = request.form.get("max_capacity")
+        max_capacity = request.form.get("max_capacity", type=int)
+
+        if day_of_week not in utilities_dao.DAYS:
+            flash("Invalid day of the week.", "danger")
+            return redirect(url_for("manager_profile"))
+
+        if not utilities_dao.validate_time_format(start_time):
+            flash("Invalid time format. Please use HH:MM format.", "danger")
+            return redirect(url_for("manager_profile"))
+
+        if not (2 <= len(kitchen) <= 30):
+            flash("Kitchen name must be between 2 and 30 characters.", "danger")
+            return redirect(url_for("manager_profile"))
+
+        if not max_capacity or not (1 <= max_capacity <= 10):
+            flash("Max capacity must be between 1 and 10.", "danger")
+            return redirect(url_for("manager_profile"))
+
+        # È SITO DI CUCINA, NON IL TARDIS
+        if utilities_dao.check_end_of_session(day_of_week, start_time, 0):
+            flash("Cannot schedule a session in the past.", "danger")
+            return redirect(url_for("manager_profile"))
 
         cooking_class_dao.update_session(session_id, day_of_week, start_time, kitchen, max_capacity)
+        flash("Session updated successfully!", "success")
 
     return redirect(url_for("manager_profile"))
 
