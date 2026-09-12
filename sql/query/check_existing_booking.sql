@@ -1,4 +1,0 @@
-SELECT *
-FROM BOOKING
-WHERE USER_email = ?
-    AND CLASS_SESSION_id = ?

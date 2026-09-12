@@ -1,6 +1,0 @@
-SELECT *
-FROM USER, BOOKING
-WHERE BOOKING.USER_email = USER.email
-    AND USER.role = 'student'
-    AND BOOKING.CLASS_SESSION_id = ? AND BOOKING.status = ?
-ORDER BY BOOKING.id ASC

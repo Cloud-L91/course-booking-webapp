@@ -1,4 +1,0 @@
-SELECT day_of_week, start_time, duration
-    FROM CLASS_SESSION, COOKING_CLASS
-    WHERE CLASS_SESSION.COOKING_CLASS_id = COOKING_CLASS.id
-        AND CLASS_SESSION.id = ?

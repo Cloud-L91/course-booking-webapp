@@ -1,2 +1,0 @@
-INSERT INTO BOOKING (status, CLASS_SESSION_id, USER_email)
-VALUES (?, ?, ?)

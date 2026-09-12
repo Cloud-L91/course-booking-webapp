@@ -1,3 +1,0 @@
-UPDATE BOOKING
-SET status = 'ENROLLED'
-WHERE id = ?

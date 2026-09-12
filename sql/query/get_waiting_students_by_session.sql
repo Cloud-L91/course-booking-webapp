@@ -1,5 +1,0 @@
-SELECT id, USER_email
-FROM BOOKING
-WHERE CLASS_SESSION_id = ?
-    AND status = 'WAITING'
-ORDER BY id ASC

@@ -1,3 +1,0 @@
-SELECT *
-FROM BOOKING
-WHERE USER_email = ?
