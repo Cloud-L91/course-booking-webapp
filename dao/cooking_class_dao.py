@@ -4,10 +4,8 @@ def get_all_classes_per_manager(manager_email):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM COOKING_CLASS WHERE USER_email = ?", (manager_email,))
-
+    cursor.execute("SELECT * FROM COOKING_CLASS WHERE USER_email = ? ORDER BY id DESC", (manager_email,))
     cooking_classes = cursor.fetchall()
-    cooking_classes.sort(key=lambda c: c["id"], reverse=True)
 
     utilities_dao.close_connection(conn, cursor)
 

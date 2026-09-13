@@ -4,7 +4,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from dao import cooking_class_dao, booking_dao, user_dao, utilities_dao
 from user import User
-import time
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "gli_occhi_del_cuore"
@@ -99,7 +98,6 @@ def session_details(session_id):
         )
 
 # AUTENTICAZIONE
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -135,21 +133,10 @@ def register():
         confirm_password = request.form.get("confirm_password")
         role = request.form.get("role")
 
-        if not all([first_name, last_name, email, password, confirm_password, role]):
-            return render_template("authentication/register.html", error="All fields are required")
-
-        if not (2 <= len(first_name) <= 50) or not (2 <= len(last_name) <= 50):
-            return render_template("authentication/register.html", error="First and last name must be between 2 and 50 characters")
-
-        if not (5 <= len(email) <= 50):
-            return render_template("authentication/register.html", error="Email must be between 5 and 50 characters")
-
-        if not (6 <= len(password) <= 30):
-            return render_template("authentication/register.html", error="Password must be between 6 and 30 characters")
-
-        if password != confirm_password:
-            return render_template("authentication/register.html", error="Passwords do not match")
-
+        error = utilities_dao.validate_registration_format(first_name, last_name, email, password, confirm_password, role)
+        if error:
+            return render_template("authentication/register.html", error=error)
+        
         if user_dao.get_user_by_email(email):
             return render_template("authentication/register.html", error="User already exists")
 
@@ -159,8 +146,79 @@ def register():
 
     return render_template("authentication/register.html")
 
-# AZIONI DELLO STUDENTE
+# PROFILI
+@app.route("/profile")
+@login_required
+def profile():
+    if current_user.role == "student":
+        return redirect(url_for("student_profile"))
+    elif current_user.role == "manager":
+        return redirect(url_for("manager_profile"))
+    else:
+        return redirect(url_for("home"))
 
+@app.route("/student_profile")
+@login_required
+def student_profile():
+    if current_user.role != "student":
+        return redirect(url_for("home"))
+
+    all_sessions = booking_dao.get_user_enrolled_sessions(current_user.email)
+    all_sessions = utilities_dao.sort_sessions_chronologically(all_sessions)
+
+    upcoming_sessions = []
+    past_sessions = []
+    on_waiting_list = []
+
+    for session in all_sessions:
+        session = dict(session)
+        ended = utilities_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"])
+
+        if session["status"] == "WAITING":
+            if not ended:
+                session["waiting_position"] = booking_dao.get_waiting_list_positions(current_user.email, session["id"])
+                on_waiting_list.append(session)
+        elif ended:
+            past_sessions.append(session)
+        else:
+            session["deletable"] = utilities_dao.check_delete_eligibility(session["day_of_week"], session["start_time"])
+            upcoming_sessions.append(session)
+
+    return render_template(
+        "student/student_profile.html",
+        upcoming_sessions=upcoming_sessions,
+        past_sessions=past_sessions,
+        on_waiting_list=on_waiting_list,
+        max_enrollments=utilities_dao.MAX_ENROLLMENTS
+        )
+
+@app.route("/manager_profile")
+@login_required
+def manager_profile():
+    if current_user.role != "manager":
+        return redirect(url_for("home"))
+
+    stats = user_dao.get_manager_stats(current_user.email)
+
+    # LISTE DI STUDENTI ISCRITTI E IN ATTESA PER OGNI SESSIONE DEL MANAGER
+    session_classes = [dict(s) for s in cooking_class_dao.get_sessions_per_manager(current_user.email)]
+    for session in session_classes:
+        session["enrolled_students"] = user_dao.get_students_by_session_and_status(session["id"], "ENROLLED")
+        session["waiting_students"] = user_dao.get_students_by_session_and_status(session["id"], "WAITING")
+        session["available_spots"] = session["max_capacity"] - session["enrolled_count"]
+
+    # CLASSI DEL MANAGER CON RATING, INGREDIENTI, SESSIONI E NUMERO DI STUDENTI IN ATTESA
+    all_classes = [dict(c) for c in cooking_class_dao.get_all_classes_per_manager(current_user.email)]
+    for cooking_class in all_classes:
+        rating, _ = cooking_class_dao.get_class_rating(cooking_class["id"])
+        cooking_class["avg_rating"] = rating
+        cooking_class["ingredients"] = cooking_class_dao.get_ingredients_per_class(cooking_class["id"])
+        cooking_class["sessions"] = [s for s in session_classes if s["COOKING_CLASS_id"] == cooking_class["id"]]
+        cooking_class["waiting_total"] = sum(len(s["waiting_students"]) for s in cooking_class["sessions"])
+
+    return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, stats=stats)
+
+# AZIONI DELLO STUDENTE
 @app.route("/enroll/<int:session_id>", methods=["POST"])
 @login_required
 def enroll(session_id):
@@ -234,95 +292,23 @@ def delete_booking(session_id):
 @app.route("/rate_session/<int:session_id>", methods=["POST"])
 @login_required
 def rate_session(session_id):
-    if current_user.role == "student":
-
-        # LO STUDENTE VALUTA SOLO A SESSIONE TERMINATA
-        session_class = cooking_class_dao.get_single_session(session_id)
-        if not utilities_dao.check_end_of_session(session_class["day_of_week"], session_class["start_time"], session_class["duration"]):
-            flash("You can only rate sessions that have ended.", "warning")
-            return redirect(url_for("student_profile"))
-
-        rating = request.form.get("rating", type=int)
-        current_rating = booking_dao.get_user_rating(current_user.email, session_id)
-
-        if current_rating is None and rating and 1 <= rating <= 5:
-            booking_dao.set_user_rating(current_user.email, session_id, rating)
-            flash("Rating submitted successfully! Thank you for your feedback!", "success")
-
-    return redirect(url_for("student_profile"))
-
-# PROFILI
-
-@app.route("/profile")
-@login_required
-def profile():
-    if current_user.role == "student":
-        return redirect(url_for("student_profile"))
-    elif current_user.role == "manager":
-        return redirect(url_for("manager_profile"))
-    else:
-        return redirect(url_for("home"))
-
-@app.route("/student_profile")
-@login_required
-def student_profile():
     if current_user.role != "student":
         return redirect(url_for("home"))
 
-    all_sessions = booking_dao.get_user_enrolled_sessions(current_user.email)
-    all_sessions = utilities_dao.sort_sessions_chronologically(all_sessions)
+    # LO STUDENTE VALUTA SOLO A SESSIONE TERMINATA
+    session_class = cooking_class_dao.get_single_session(session_id)
+    if not utilities_dao.check_end_of_session(session_class["day_of_week"], session_class["start_time"], session_class["duration"]):
+        flash("You can only rate sessions that have ended.", "warning")
+        return redirect(url_for("student_profile"))
 
-    upcoming_sessions = []
-    past_sessions = []
-    on_waiting_list = []
+    rating = request.form.get("rating", type=int)
+    current_rating = booking_dao.get_user_rating(current_user.email, session_id)
 
-    for session in all_sessions:
-        session = dict(session)
-        ended = utilities_dao.check_end_of_session(session["day_of_week"], session["start_time"], session["duration"])
+    if current_rating is None and rating and 1 <= rating <= 5:
+        booking_dao.set_user_rating(current_user.email, session_id, rating)
+        flash("Rating submitted successfully! Thank you for your feedback!", "success")
 
-        if session["status"] == "WAITING":
-            if not ended:
-                session["waiting_position"] = booking_dao.get_waiting_list_positions(current_user.email, session["id"])
-                on_waiting_list.append(session)
-        elif ended:
-            past_sessions.append(session)
-        else:
-            session["deletable"] = utilities_dao.check_delete_eligibility(session["day_of_week"], session["start_time"])
-            upcoming_sessions.append(session)
-
-    return render_template(
-        "student/student_profile.html",
-        upcoming_sessions=upcoming_sessions,
-        past_sessions=past_sessions,
-        on_waiting_list=on_waiting_list,
-        max_enrollments=utilities_dao.MAX_ENROLLMENTS
-        )
-
-@app.route("/manager_profile")
-@login_required
-def manager_profile():
-    if current_user.role != "manager":
-        return redirect(url_for("home"))
-
-    stats = user_dao.get_manager_stats(current_user.email)
-
-    # LISTE DI STUDENTI ISCRITTI E IN ATTESA PER OGNI SESSIONE DEL MANAGER
-    session_classes = [dict(s) for s in cooking_class_dao.get_sessions_per_manager(current_user.email)]
-    for session in session_classes:
-        session["enrolled_students"] = user_dao.get_students_by_session_and_status(session["id"], "ENROLLED")
-        session["waiting_students"] = user_dao.get_students_by_session_and_status(session["id"], "WAITING")
-        session["available_spots"] = session["max_capacity"] - session["enrolled_count"]
-
-    # CLASSI DEL MANAGER CON RATING, INGREDIENTI, SESSIONI E NUMERO DI STUDENTI IN ATTESA
-    all_classes = [dict(c) for c in cooking_class_dao.get_all_classes_per_manager(current_user.email)]
-    for cooking_class in all_classes:
-        rating, _ = cooking_class_dao.get_class_rating(cooking_class["id"])
-        cooking_class["avg_rating"] = rating
-        cooking_class["ingredients"] = cooking_class_dao.get_ingredients_per_class(cooking_class["id"])
-        cooking_class["sessions"] = [s for s in session_classes if s["COOKING_CLASS_id"] == cooking_class["id"]]
-        cooking_class["waiting_total"] = sum(len(s["waiting_students"]) for s in cooking_class["sessions"])
-
-    return render_template("manager/manager_profile.html", all_classes=all_classes, session_classes=session_classes, stats=stats)
+    return redirect(url_for("student_profile"))
 
 # AZIONI DEL MANAGER
 @app.route("/create_class", methods=["GET", "POST"])
@@ -340,46 +326,23 @@ def create_class():
         description = request.form.get("description")
         dietary_category = request.form.get("dietary_category")
         raw_ingredients = request.form.get("ingredients", "")
+        uploaded_photos = [
+            request.files.get("photo_1"),
+            request.files.get("photo_2"),
+            request.files.get("photo_3")
+        ]
 
         ingredients = [ingredient.strip() for ingredient in raw_ingredients.splitlines() if ingredient.strip()]
 
-        # CONTROLLI BACK-END
-        if not 2 <= len(title) <= 30:
-            return render_template("manager/create_class.html", error="Title must be between 2 and 30 characters")
-
-        if not 2 <= len(cuisine) <= 30:
-            return render_template("manager/create_class.html", error="Cuisine must be between 2 and 30 characters")
-
-        if not 30 <= duration <= 240:
-            return render_template("manager/create_class.html", error="Duration must be between 30 and 240 minutes")
-
-        if difficulty not in ["Beginner", "Intermediate", "Advanced"]:
-            return render_template("manager/create_class.html", error="Invalid difficulty level")
-
-        if not 2 <= len(chef_name) <= 30:
-            return render_template("manager/create_class.html", error="Chef name must be between 2 and 30 characters")
-
-        if len(description) > 500:
-            return render_template("manager/create_class.html", error="Description cannot exceed 500 characters")
-
-        if dietary_category not in ["Standard", "Vegetarian", "Vegan", "Gluten-free"]:
-            return render_template("manager/create_class.html", error="Invalid dietary category")
-
-        if len(ingredients) < 4:
-            return render_template("manager/create_class.html", error="Please insert at least 4 ingredients")
+        # CONTROLLI BACK-END DEI FORMAT E DEI VINCOLI SUI CAMPI PER LA CREAZIONE DI UNA CLASSE
+        error = utilities_dao.validate_class_format(title, cuisine, duration, difficulty, chef_name, description, dietary_category, ingredients)
+        if error:
+            return render_template("manager/create_class.html", error=error)
 
         # FOTO SALVATE CON NOME MANAGER + TIMESTAMP + NUMERO FOTO + NOME FILE, PER EVITARE CONFLITTI TRA MANAGER DIVERSI
-        timestamp = int(time.time())
-        photos = []
-
-        for num in [1, 2, 3]:
-            uploaded_file = request.files.get(f"photo_{num}")
-            if not uploaded_file or not uploaded_file.filename:
-                return render_template("manager/create_class.html", error="All three photos are required")
-
-            photo_name = f"{current_user.email}_{timestamp}_{num}_{uploaded_file.filename}"
-            uploaded_file.save(f"static/img/classes/{photo_name}")
-            photos.append(photo_name)
+        photos, photo_error = utilities_dao.save_class_photos(current_user.email, uploaded_photos)
+        if photo_error:
+            return render_template("manager/create_class.html", error=photo_error)
 
         cooking_class_dao.add_cooking_class(title, cuisine, duration, difficulty, chef_name, description,
                                             dietary_category, photos[0], photos[1], photos[2],
@@ -406,26 +369,12 @@ def add_session(class_id):
     start_time = request.form.get("start_time")
     kitchen = request.form.get("kitchen")
     max_capacity = request.form.get("max_capacity", type=int)
-    
-    if day_of_week not in utilities_dao.DAYS:
-        flash("Invalid day of the week.", "danger")
-        return redirect(url_for("manager_profile"))
 
-    # È SITO DI CUCINA, NON IL TARDIS
-    if utilities_dao.check_end_of_session(day_of_week, start_time, 0):
-        flash("Cannot schedule a session in the past.", "danger")
-        return redirect(url_for("manager_profile"))
+    # CONTROLLO BACK-END DEI FORMAT E DEI VINCOLI SUI CAMPI PER LA CREAZIONE DI UNA SESSIONE
+    error = utilities_dao.validate_session_format(day_of_week, start_time, kitchen, max_capacity)
 
-    if not utilities_dao.validate_time_format(start_time):
-        flash("Invalid time format. Please use HH:MM format.", "danger")
-        return redirect(url_for("manager_profile"))
-
-    if not (2 < len(kitchen) < 30):
-        flash("Kitchen name must be between 2 and 30 characters.", "danger")
-        return redirect(url_for("manager_profile"))
-    
-    if not max_capacity or not (1 <= int(max_capacity) <= 10):
-        flash("Max capacity must be between 1 and 10", "danger")
+    if error:
+        flash(error, "danger")
         return redirect(url_for("manager_profile"))
 
     cooking_class_dao.add_session(class_id, day_of_week, start_time, kitchen, max_capacity)
@@ -457,30 +406,14 @@ def manage_session(session_id):
         kitchen = request.form.get("kitchen")
         max_capacity = request.form.get("max_capacity", type=int)
 
-        if day_of_week not in utilities_dao.DAYS:
-            flash("Invalid day of the week.", "danger")
-            return redirect(url_for("manager_profile"))
-
-        if not utilities_dao.validate_time_format(start_time):
-            flash("Invalid time format. Please use HH:MM format.", "danger")
-            return redirect(url_for("manager_profile"))
-
-        if not (2 <= len(kitchen) <= 30):
-            flash("Kitchen name must be between 2 and 30 characters.", "danger")
-            return redirect(url_for("manager_profile"))
-
-        if not max_capacity or not (1 <= max_capacity <= 10):
-            flash("Max capacity must be between 1 and 10.", "danger")
-            return redirect(url_for("manager_profile"))
-
-        # È SITO DI CUCINA, NON IL TARDIS
-        if utilities_dao.check_end_of_session(day_of_week, start_time, 0):
-            flash("Cannot schedule a session in the past.", "danger")
+        error = utilities_dao.validate_session_format(day_of_week, start_time, kitchen, max_capacity)
+        if error:
+            flash(error, "danger")
             return redirect(url_for("manager_profile"))
 
         cooking_class_dao.update_session(session_id, day_of_week, start_time, kitchen, max_capacity)
         flash("Session updated successfully!", "success")
-
+        
     return redirect(url_for("manager_profile"))
 
 if __name__ == "__main__":

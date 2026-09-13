@@ -33,7 +33,6 @@ def enroll_user_in_session(session_id, user_email, max_reached, has_conflict):
 
     return status
 
-
 def check_existing_booking(user_email, session_id):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
@@ -117,7 +116,8 @@ def promote_waiting_list(session_id, conn=None, cursor=None):
 
     # PARTE FIFO DELLA FUNZIONE
     for user in waiting_users:
-        if count_user_enrollments(user["USER_email"]) < utilities_dao.MAX_ENROLLMENTS:
+        user_email = user["USER_email"]
+        if (count_user_enrollments(user["USER_email"]) < utilities_dao.MAX_ENROLLMENTS and not check_time_conflict(user_email, session_id)):
             cursor.execute("UPDATE BOOKING SET status = 'ENROLLED' WHERE id = ?", (user["id"],))
             break
 
@@ -181,11 +181,7 @@ def get_user_rating(user_email, session_id):
     rating = cursor.fetchone()
 
     utilities_dao.close_connection(conn, cursor)
-
-    if rating:
-        return rating["rating"]
-    else:
-        return None
+    return rating["rating"] if rating else None
 
 def set_user_rating(user_email, session_id, rating):
     conn = utilities_dao.db_connect()
