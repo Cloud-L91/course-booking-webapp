@@ -283,13 +283,9 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                 <label class="form-label small fw-semibold mb-1">Day</label>
                                 <select name="day_of_week" class="form-select form-select-sm" required>
                                     <option value="" selected disabled>Choose...</option>
-                                    <option value="Monday">Monday</option>
-                                    <option value="Tuesday">Tuesday</option>
-                                    <option value="Wednesday">Wednesday</option>
-                                    <option value="Thursday">Thursday</option>
-                                    <option value="Friday">Friday</option>
-                                    <option value="Saturday">Saturday</option>
-                                    <option value="Sunday">Sunday</option>
+                                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                    <option value="{{ day }}">{{ day }}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
 
