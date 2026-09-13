@@ -110,6 +110,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                 <span class="badge rounded-pill badge-diff-{{ classes.difficulty|lower }}">{{ classes.difficulty }}</span>
                                 {% if classes.avg_rating %}
                                 <span class="small fw-bold text-dark">{{ classes.avg_rating }} <i class="bi bi-star-fill joe-star"></i></span>
+                                <span class="text-muted small">({{ classes.total_votes }} votes)</span>
                                 {% else %}
                                 <span class="text-muted small">Not rated</span>
                                 {% endif %}

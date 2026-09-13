@@ -210,8 +210,9 @@ def manager_profile():
     # CLASSI DEL MANAGER CON RATING, INGREDIENTI, SESSIONI E NUMERO DI STUDENTI IN ATTESA
     all_classes = [dict(c) for c in cooking_class_dao.get_all_classes_per_manager(current_user.email)]
     for cooking_class in all_classes:
-        rating, _ = cooking_class_dao.get_class_rating(cooking_class["id"])
+        rating, total_votes = cooking_class_dao.get_class_rating(cooking_class["id"])
         cooking_class["avg_rating"] = rating
+        cooking_class["total_votes"] = total_votes
         cooking_class["ingredients"] = cooking_class_dao.get_ingredients_per_class(cooking_class["id"])
         cooking_class["sessions"] = [s for s in session_classes if s["COOKING_CLASS_id"] == cooking_class["id"]]
         cooking_class["waiting_total"] = sum(len(s["waiting_students"]) for s in cooking_class["sessions"])
