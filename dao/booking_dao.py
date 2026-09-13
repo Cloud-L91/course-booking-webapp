@@ -1,6 +1,6 @@
 from dao import utilities_dao
 
-def enroll_user_in_session(session_id, user_email):
+def enroll_user_in_session(session_id, user_email, max_reached, has_conflict):
     conn = utilities_dao.db_connect()
     cursor = conn.cursor()
 
@@ -17,10 +17,21 @@ def enroll_user_in_session(session_id, user_email):
     result = cursor.fetchone()
 
     available_spots = result["available_spots"] if result else 0
-    status = "ENROLLED" if available_spots > 0 else "WAITING"
 
+    # SE CI SONO POSTI DISPONIBILI, MA LO STUDENTE HA RAGGIUNTO IL LIMITE DI ISCRIZIONI O HA UN CONFLITTO DI ORARIO, NON SI ISCRIVE
+    if available_spots > 0:
+        if max_reached or has_conflict:
+            utilities_dao.close_connection(conn, cursor)
+            return None
+        status = "ENROLLED"
+    else:
+        status = "WAITING"
+
+    # NESSUNA VIOLAZIONE
     cursor.execute("INSERT INTO BOOKING (status, CLASS_SESSION_id, USER_email) VALUES (?, ?, ?)", (status, session_id, user_email))
     utilities_dao.close_connection(conn, cursor)
+
+    return status
 
 
 def check_existing_booking(user_email, session_id):
@@ -110,7 +121,8 @@ def promote_waiting_list(session_id, conn=None, cursor=None):
             cursor.execute("UPDATE BOOKING SET status = 'ENROLLED' WHERE id = ?", (user["id"],))
             break
 
-    utilities_dao.close_connection(conn, cursor)
+    if close_locally:
+        utilities_dao.close_connection(conn, cursor)
 
 def get_waiting_students_by_session(session_id):
     conn = utilities_dao.db_connect()

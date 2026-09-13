@@ -59,7 +59,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                         
                                     </div>
 
-                                    <p class="card-text mb-3">{{ upcoming.cuisine }} &bull; Chef {{ upcoming.chef_name }}</p>
+                                    <p class="card-text mb-3">{{ upcoming.cuisine }} • Chef {{ upcoming.chef_name }}</p>
                                     <ul class="list-unstyled small mb-3">
                                         <li><i class="bi bi-calendar3 me-1"></i> {{ upcoming.day_of_week }} at {{ upcoming.start_time }}</li>
                                         <li><i class="bi bi-clock me-1"></i> {{ upcoming.duration }} min</li>
@@ -111,7 +111,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                             <strong>{{ waiting.title }}</strong>
                                         </a>
                                         <br>
-                                        <small class="text-muted">{{ waiting.cuisine }} &bull; Chef {{ waiting.chef_name }}</small>
+                                        <small class="text-muted">{{ waiting.cuisine }} • Chef {{ waiting.chef_name }}</small>
                                     </td>
                                     <td>{{ waiting.day_of_week }} at {{ waiting.start_time }}</td>
                                     <td>{{ waiting.duration }} min</td>
@@ -153,7 +153,7 @@ The cake is a lie - {{ current_user.first_name }} {{ current_user.last_name }}
                                             <strong>{{ passed.title }}</strong>
                                         </a>
                                         <br>
-                                        <small class="text-muted">{{ passed.cuisine }} &bull; Chef {{ passed.chef_name }}</small>
+                                        <small class="text-muted">{{ passed.cuisine }} • Chef {{ passed.chef_name }}</small>
                                     </td>
                                     <td>{{ passed.day_of_week }} at {{ passed.start_time }}</td>
                                     <td>{{ passed.duration }} min</td>

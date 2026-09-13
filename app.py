@@ -184,22 +184,21 @@ def enroll(session_id):
         flash("You cannot register for this session.", "warning")
         return redirect(url_for("session_details", session_id=session_id))
 
-    available_spots = cooking_class_dao.get_available_spots(session_id)
+    # VINCOLI SUL NUMERO MASSIMO DI ISCRIZIONI E SUI CONFLITTI DI ORARIO
+    max_reached = booking_dao.count_user_enrollments(current_user.email) >= utilities_dao.MAX_ENROLLMENTS
+    has_conflict = booking_dao.check_time_conflict(current_user.email, session_id)
 
-    if available_spots > 0:
-        # SE POSTI DISPONIBILI, MA LO STUDENTE HA GIA' RAGGIUNTO IL LIMITE DI ISCRIZIONI O HA UN CONFLITTO DI ORARIO, NON SI PUO' ISCRIVERE
-        if booking_dao.count_user_enrollments(current_user.email) >= utilities_dao.MAX_ENROLLMENTS:
+    # RITORNA None SE L'UTENTE NON PUO' ISCRIVERSI, ALTRIMENTI RITORNA "ENROLLED" O "WAITING"
+    result_status = booking_dao.enroll_user_in_session(session_id, current_user.email, max_reached, has_conflict)
+
+    if result_status is None:
+        if max_reached:
             flash("You have reached the maximum number of enrollments.", "warning")
-            return redirect(url_for("session_details", session_id=session_id))
-        if booking_dao.check_time_conflict(current_user.email, session_id):
+        elif has_conflict:
             flash("You have a time conflict with another session.", "warning")
-            return redirect(url_for("session_details", session_id=session_id))
-
-    booking_dao.enroll_user_in_session(session_id, current_user.email)
-
-    if available_spots > 0:
+    elif result_status == "ENROLLED":
         flash("Successfully enrolled in the session!", "success")
-    else:
+    elif result_status == "WAITING":
         flash("Class is full: you have been added to the waiting list.", "warning")
 
     return redirect(url_for("session_details", session_id=session_id))
@@ -224,7 +223,11 @@ def delete_booking(session_id):
         return redirect(url_for("session_details", session_id=session_id))
 
     booking_dao.delete_booking(current_user.email, session_id)
-    flash("Booking deleted successfully.", "success")
+    
+    if user_status == "ENROLLED":
+        flash("Booking cancelled successfully.", "success")
+    else:
+        flash("You have left the waiting list.", "info")
 
     return redirect(url_for("session_details", session_id=session_id))
 
