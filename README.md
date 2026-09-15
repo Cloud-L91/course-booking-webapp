@@ -1,6 +1,8 @@
 # The Cake Is a Lie
 
-For my exam project, I built **The Cake Is a Lie** as a web application for managing kitchen sessions of a cooking school.
+Academic project developed for the Web Applications course at Polytechnic University of Turin.
+
+I built **The Cake Is a Lie** as a web application for managing kitchen sessions of a cooking school.
 The platform provides an environment where visitors and students can browse culinary offerings, reserve kitchen workstations, rate past experiences, and manage their weekly schedule. Cooking school managers can create new classes, schedule sessions, oversee enrolled students and waiting lists, and monitor administrative analytics.
 
 The user interface is in English and designed primarily for desktop use, while retaining some responsive layouts for mobile devices.
@@ -19,7 +21,7 @@ This temporal reference determines:
 
 ## Demo accounts
 
-The database comes pre-populated with accounts across both roles to allow testing of standard flows, edge cases, schedule overlap detection, and waiting list promotions[cite: 2, 50, 52].
+The database comes pre-populated with accounts across both roles to allow testing of standard flows, edge cases, schedule overlap detection, and waiting list promotions.
 
 | Role | Email | Password |
 |---|---|---|---|
