@@ -1,0 +1,14 @@
+# Cache Python (evita di caricare i .pyc)
+__pycache__/
+*.pyc
+*/__pycache__/
+dao/__pycache__/
+
+# Dati di sessione / Ambiente virtuale
+venv/
+.venv/
+env/
+
+# Se vuoi tracciare un DB pulito ma non i test temporanei o file di sistema
+.DS_Store
+Thumbs.db
